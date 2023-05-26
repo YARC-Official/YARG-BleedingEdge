@@ -1,0 +1,160 @@
+name: Builds - Windows (development)
+
+on:
+  repository_dispatch:
+    types: [new_edge_build]
+  workflow_dispatch:
+  schedule:
+    - cron: '25 0,12 * * *'
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  unityVersion: "2021.3.21f1"
+  unityVersionHash: "1b156197d683"
+
+permissions:
+  contents: write
+
+jobs:
+  windowsBuilder:
+    name: Windows Build
+    runs-on: windows-2019
+    timeout-minutes: 90
+
+    steps:
+      ###########################
+      #      Install Unity      #
+      ###########################
+
+      - name: "[Install] Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
+        id: unity-install
+        uses: actions/cache@v3.2.2
+        with: 
+          path: ${{ runner.temp }}/Unity
+          key: windows-unity-${{ env.unityVersion }}
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "[Install] Download Unity Editor + Windows IL2CPP builder"
+        continue-on-error: true
+        run: >
+          mkdir ${{ runner.temp }}\UnityInstall;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/Windows64EditorInstaller/UnitySetup64-${{ env.unityVersion }}.exe;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/TargetSupportInstaller/UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe;
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "[Install] Install Unity"
+        run: >
+          $UNITY_INSTALLARGUMENTS = "/S /D=${{ runner.temp }}\\Unity";
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Remove-Item -Recurse -Force -Path ${{ runner.temp }}\UnityInstall\*;
+
+      ###########################
+      #         Checkout        #
+      ###########################
+      - name: "[Pre-install] Pull project"
+        uses: nschloe/action-cached-lfs-checkout@v1.2.1
+        with:
+          repository: YARC-Official/YARG
+          ref: dev
+
+      - name: "[Pre-install] Save commit sha into output"
+        id: latestCommit
+        run: |
+          "commitSHA=$(git show-ref | grep refs/remotes/origin/dev | cut -c1-40)" >> $env:GITHUB_OUTPUT;
+          "commitShortSHA=$(git show-ref | grep refs/remotes/origin/dev | cut -c1-7)" >> $env:GITHUB_OUTPUT;
+
+      ###########################
+      #          Cache          #
+      ###########################
+      - name: "[Pre-install] Restore 'library' cache"
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: YARG-Library-Windows-Development
+          restore-keys: |
+            YARG-Library-Windows-
+
+      ###########################
+      #     Install Blender     #
+      ###########################
+
+
+      - name: "[Pre-install] Get Blender (3.5.1) from cache"
+        id: blender
+        uses: actions/cache@v3
+        with: 
+          path: ${{ runner.temp }}/BlenderInstall
+          key: windows-blender-3.5.1
+          restore-keys: windows-blender-
+
+      - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
+        name: "[Pre-install] Download Blender (3.5.1)"
+        continue-on-error: true
+        run: mkdir ${{ runner.temp }}\BlenderInstall && curl -L -o "${{ runner.temp }}\BlenderInstall\blender.msi" https://download.blender.org/release/Blender3.5/blender-3.5.1-windows-x64.msi
+
+      - name: "[Pre-install] Install Blender (3.5.1)"
+        run: >
+          $BLENDERMSI = "${{ runner.temp }}\BlenderInstall\blender.msi";
+          $BLENDERARGS = "/I $BLENDERMSI ALLUSERS=1 /qn /norestart";
+          Start-Process "msiexec.exe" -ArgumentList $BLENDERARGS -wait -nonewwindow
+
+      ###########################
+      #    Install Libraries    #
+      ###########################
+      - name: "[Pre-install] Install Libraries"
+        run: pip3 install requests && python3 InstallLibraries/install.py
+        
+      ###########################
+      #    Restore  Packages    #
+      ###########################
+
+      - name: "[Pre-install] Install dotnet 7.x"
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: "[Pre-install] Restoring NuGet Packages"
+        run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
+
+      ###########################
+      #          Build          #
+      ###########################
+      - name: "[Build] Run Builder"
+        run: >
+          ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneWindows64 -buildWindows64Player ${{ github.workspace }}/build/YARG.exe -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.WINDOWS_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile | Out-Host;
+          Write-Output "$('Finished build, exit code ')$($LastExitCode)$('"')";
+          Remove-Item -Recurse -Force -Path ${{ github.workspace }}\build\YARG_BurstDebugInformation_DoNotShip\*;
+
+      ###########################
+      #        Compress         #
+      ###########################
+      - name: "[Post-build] Compress for release"
+        run: >
+          mkdir Release;
+          Compress-Archive -Path ${{ github.workspace }}/build/* -DestinationPath ${{ github.workspace }}/Release/YARG_${{ steps.latestCommit.outputs.commitSHA }}-Windows-x64.zip;
+
+      ###########################
+      #         Upload          #
+      ###########################
+      # - name: "[Post-build] Upload to artifacts"
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Windows x64
+      #     path: Release
+
+      - name: "[Post-build] Upload to releases"
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          release_name: Nightly Build - ${{ steps.latestCommit.outputs.commitSHA }}
+          tag: ${{ steps.latestCommit.outputs.commitShortSHA }}
+          file: Release/*
+          file_glob: true
+          body: |
+            Built using the commit https://github.com/YARC-Official/YARG/commit/${{ steps.latestCommit.outputs.commitSHA }}
+            
+            ${{ vars.RELEASE_BODYMESSAGE || '' }}
