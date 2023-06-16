@@ -136,7 +136,7 @@ jobs:
       #        Compress         #
       ###########################
       - name: "[Post-build] Compress to a .zip"
-        run: mkdir Release && zip -r Release/YARG_${{ steps.latestCommit.outputs.commitSHA }}-Linux-x64.zip ${{ github.workspace }}/build/
+        run: mkdir Release && (cd build && zip -r ../Release/YARG_${{ steps.latestCommit.outputs.commitSHA }}-Linux-x64.zip .)
         
       ###########################
       #         Upload          #
