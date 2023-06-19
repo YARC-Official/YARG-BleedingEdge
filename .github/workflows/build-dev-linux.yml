@@ -105,12 +105,6 @@ jobs:
           sudo tar xvf "${{ runner.temp }}/BlenderInstall/blender.tar.xz" -C /opt/ &&
           sudo mv /opt/blender*/ /opt/blender &&
           sudo ln -sf /opt/blender/blender /usr/bin/blender
-
-      ###########################
-      #    Install Libraries    #
-      ###########################
-      - name: "[Pre-install] Install Libraries"
-        run: pip3 install requests && python3 InstallLibraries/install.py
         
       ###########################
       #    Restore  Packages    #

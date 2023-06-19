@@ -101,12 +101,6 @@ jobs:
           $BLENDERMSI = "${{ runner.temp }}\BlenderInstall\blender.msi";
           $BLENDERARGS = "/I $BLENDERMSI ALLUSERS=1 /qn /norestart";
           Start-Process "msiexec.exe" -ArgumentList $BLENDERARGS -wait -nonewwindow
-
-      ###########################
-      #    Install Libraries    #
-      ###########################
-      - name: "[Pre-install] Install Libraries"
-        run: pip3 install requests && python3 InstallLibraries/install.py
         
       ###########################
       #    Restore  Packages    #
