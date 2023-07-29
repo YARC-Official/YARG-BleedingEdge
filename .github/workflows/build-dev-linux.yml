@@ -19,8 +19,35 @@ permissions:
   contents: write
 
 jobs:
+  check:
+    name: "Check for releases"
+    runs-on: ubuntu-latest
+    outputs: 
+      runBuild: ${{ steps.check-latest-output.outputs.runBuild }}
+      messageBody: ${{ steps.check-latest-output.outputs.messageBody }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Setup Node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: "Install dependencies"
+        run: npm i
+
+      - name: "Check for latest release / Save information to output"
+        id: check-latest-output
+        run: node methods/CheckLatestRelease.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   linuxBuilder:
     name: Linux Build
+    needs: [check]
+    if: needs.check.outputs.runBuild == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -126,6 +153,9 @@ jobs:
         run: |
           ${{ runner.temp }}/Unity/Editor/Unity -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneLinux64 -buildLinux64Player ${{ github.workspace }}/build/YARG -username ${{ secrets.LINUX_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.LINUX_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.LINUX_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
 
+      - name: "[Post-build] Remove YARG_BurstDebugInformation_DoNotShip"
+        run: rm -rf YARG_BurstDebugInformation_DoNotShip
+
       ###########################
       #        Compress         #
       ###########################
@@ -149,7 +179,4 @@ jobs:
           tag: ${{ steps.latestCommit.outputs.commitShortSHA }}
           file: Release/*
           file_glob: true
-          body: |
-            Built using the commit https://github.com/YARC-Official/YARG/commit/${{ steps.latestCommit.outputs.commitSHA }}
-            
-            ${{ vars.RELEASE_BODYMESSAGE || '' }}
+          body: ${{ needs.check.outputs.messageBody }}
