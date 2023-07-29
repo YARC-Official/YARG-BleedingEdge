@@ -12,6 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  platform: "Linux"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
 
@@ -43,6 +44,7 @@ jobs:
         run: node methods/CheckLatestRelease.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLATFORM: ${{ env.platform }}
 
   linuxBuilder:
     name: Linux Build

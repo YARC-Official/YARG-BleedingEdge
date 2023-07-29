@@ -6,6 +6,22 @@ const latestRelease = await GetLatestRelease("YARC-Official", "YARG-BleedingEdge
 
 const commits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH, latestRelease.published_at);
 
+function FindIfLastestCommitHasBuild(release) {
+    if(commits.length <= 0) return true;
+    
+    const sha = commits[0].oid;
+    const platform = process.env.PLATFORM;
+    const assetName = `YARG_${sha}-${platform}`;
+
+    const index = release.assets.findIndex(asset => 
+        asset.name
+        .toLowerCase()
+        .startsWith(assetName.toLowerCase())
+    );
+
+    return index >= 0;
+}
+
 /**
  * Takes all messages from commits and format them to the release message body;
  * @param {Object[]} commits 
@@ -16,7 +32,7 @@ function formatMessages(commits) {
     .join("");
 };
 
-if(commits.length <= 0) {
+if(FindIfLastestCommitHasBuild(latestRelease)) {
     
     core.setOutput("runBuild", false);
 
