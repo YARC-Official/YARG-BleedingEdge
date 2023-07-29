@@ -77,3 +77,14 @@ export async function GetCommits(repositoryAuthor, repositoryName, branch, since
 
     return data.repository.ref.target.history.nodes;
 }
+
+/**
+ * @param {string} repositoryAuthor 
+ * @param {string} repositoryName 
+ * @param {string} branch 
+ */
+export async function GetLatestCommit(repositoryAuthor, repositoryName, branch = "main") {
+    const data = await GithubRESTAPI(`repos/${repositoryAuthor}/${repositoryName}/commits/${branch}`);
+
+    return data;
+}
