@@ -15,6 +15,7 @@ env:
   platform: "Linux"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
+  branch: "rewrite"
 
 permissions:
   contents: write
@@ -93,13 +94,17 @@ jobs:
         uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
           repository: YARC-Official/YARG
-          ref: dev
+          ref: ${{ env.branch }}
+          submodules: recursive
+
+      - name: "[Pre-install] Pull latest submodules"
+        run: git submodule update
 
       - name: "[Pre-install] Save commit sha into output"
         id: latestCommit
         run: |
-          echo "commitSHA=$(git show-ref | grep refs/remotes/origin/dev | cut -c1-40)" >> "$GITHUB_OUTPUT" &&
-          echo "commitShortSHA=$(git show-ref | grep refs/remotes/origin/dev | cut -c1-7)" >> "$GITHUB_OUTPUT"
+          echo "commitSHA=$(git show-ref | grep refs/remotes/origin/${{ env.branch }} | cut -c1-40)" >> "$GITHUB_OUTPUT" &&
+          echo "commitShortSHA=$(git show-ref | grep refs/remotes/origin/${{ env.branch }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
 
       ###########################
       #          Cache          #
@@ -156,7 +161,7 @@ jobs:
           ${{ runner.temp }}/Unity/Editor/Unity -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneLinux64 -buildLinux64Player ${{ github.workspace }}/build/YARG -username ${{ secrets.LINUX_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.LINUX_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.LINUX_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
 
       - name: "[Post-build] Remove YARG_BurstDebugInformation_DoNotShip"
-        run: rm -rf YARG_BurstDebugInformation_DoNotShip
+        run: (cd build && rm -rf YARG_BurstDebugInformation_DoNotShip)
 
       ###########################
       #        Compress         #
