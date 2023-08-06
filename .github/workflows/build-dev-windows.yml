@@ -51,7 +51,7 @@ jobs:
     name: Windows Build
     needs: [check]
     if: needs.check.outputs.runBuild == 'true'
-    runs-on: windows-2019
+    runs-on: windows-latest
     timeout-minutes: 90
 
     steps:
