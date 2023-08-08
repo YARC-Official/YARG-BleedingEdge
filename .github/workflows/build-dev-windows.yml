@@ -149,6 +149,14 @@ jobs:
         run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
 
       ###########################
+      #     Build YARG.Core     #
+      ###########################
+      - name: "[Pre-build] Build YARG.Core"
+        run: >
+          ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -projectPath ${{ github.workspace }} -executeMethod YARGCoreBuilder.BuildYARGCoreDLL -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.WINDOWS_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile | Out-Host;
+          Write-Output "$('Finished building YARG.Core, exit code ')$($LastExitCode)$('"')";
+
+      ###########################
       #          Build          #
       ###########################
       - name: "[Build] Run Builder"
