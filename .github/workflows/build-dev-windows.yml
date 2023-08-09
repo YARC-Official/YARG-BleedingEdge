@@ -153,8 +153,8 @@ jobs:
       ###########################
       - name: "[Pre-build] Build YARG.Core"
         run: >
-          ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -projectPath ${{ github.workspace }} -executeMethod YARGCoreBuilder.BuildYARGCoreDLL -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.WINDOWS_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile | Out-Host;
-          Write-Output "$('Finished building YARG.Core, exit code ')$($LastExitCode)$('"')";
+          mkdir Assets/Plugins/YARG.Core;
+          dotnet publish YARG.Core/YARG.Core/YARG.Core.csproj /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary --output Assets/Plugins/YARG.Core;
 
       ###########################
       #          Build          #
