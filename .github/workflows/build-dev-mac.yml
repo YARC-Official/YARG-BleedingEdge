@@ -59,12 +59,14 @@ jobs:
       #         Checkout        #
       ###########################
       - name: "[Pre-install] Pull project"
-        uses: actions/checkout@v3
+        uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
           repository: YARC-Official/YARG
           ref: ${{ env.branch }}
           submodules: recursive
-          lfs: true
+
+      - name: "[Pre-install] Pull latest submodules"
+        run: git submodule update
 
       - name: "[Pre-install] Save commit sha into output"
         id: latestCommit
