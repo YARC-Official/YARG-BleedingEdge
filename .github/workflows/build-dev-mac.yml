@@ -154,11 +154,11 @@ jobs:
       ###########################
       #         Upload          #
       ###########################
-      # - name: "[Post-build] Upload to artifacts"
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: MacOS Universal
-      #     path: Release
+      - name: "[Post-build] Upload project to artifacts for debugging"
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS Universal
+          path: ${{ github.workspace }}
 
       - name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2
