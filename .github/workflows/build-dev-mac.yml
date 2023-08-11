@@ -4,6 +4,11 @@ on:
   repository_dispatch:
     types: [new_edge_build]
   workflow_dispatch:
+    inputs:
+      debug:
+        description: "Debug mode"
+        default: false
+        type: boolean
   schedule:
     - cron: '25 0,12 * * *'
 
@@ -153,7 +158,8 @@ jobs:
       ###########################
       #         Upload          #
       ###########################
-      - name: "[Post-build] Upload project to artifacts for debugging"
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Upload project to artifacts for debugging"
         uses: actions/upload-artifact@v3
         with:
           name: MacOS Universal - Overall Project
@@ -161,12 +167,14 @@ jobs:
             **/*
             !Library
             !YARG.Core
-            !Build
+            !build
 
-      - name: "Compress library folder for debug"
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Compress library folder for upload"
         run: zip -r Library.zip Library
 
-      - name: "[Post-build] Upload project to artifacts for debugging"
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Upload library to artifacts for debugging"
         uses: actions/upload-artifact@v3
         with:
           name: MacOS Universal - Library folder
