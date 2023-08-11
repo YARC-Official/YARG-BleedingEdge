@@ -7,9 +7,9 @@ on:
   schedule:
     - cron: '25 0,12 * * *'
 
-concurrency:
-  group: mac-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: mac-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#   cancel-in-progress: true
 
 env:
   platform: "MacOS"
@@ -157,8 +157,18 @@ jobs:
       - name: "[Post-build] Upload project to artifacts for debugging"
         uses: actions/upload-artifact@v3
         with:
-          name: MacOS Universal
-          path: ${{ github.workspace }}
+          name: MacOS Universal - Overall Project
+          path: |
+            **/*
+            !Library
+            !YARG.Core
+
+      - name: "[Post-build] Upload project to artifacts for debugging"
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS Universal - Library folder
+          path: |
+            Library
 
       - name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2
