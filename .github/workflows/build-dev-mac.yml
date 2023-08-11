@@ -52,7 +52,6 @@ jobs:
     needs: [check]
     if: needs.check.outputs.runBuild == 'true'
     runs-on: macos-latest
-    timeout-minutes: 90
 
     steps:
       ###########################
@@ -162,13 +161,16 @@ jobs:
             **/*
             !Library
             !YARG.Core
+            !Build
+
+      - name: "Compress library folder for debug"
+        run: zip -r Library.zip Library
 
       - name: "[Post-build] Upload project to artifacts for debugging"
         uses: actions/upload-artifact@v3
         with:
           name: MacOS Universal - Library folder
-          path: |
-            Library
+          path: Library.zip
 
       - name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2
