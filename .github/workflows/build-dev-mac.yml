@@ -20,6 +20,7 @@ env:
   platform: "MacOS"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
+  repository: Pantotone/YARG
   branch: "rewrite"
 
 permissions:
@@ -65,7 +66,7 @@ jobs:
       - name: "[Pre-install] Pull project"
         uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
-          repository: YARC-Official/YARG
+          repository: ${{ env.repository }}
           ref: ${{ env.branch }}
           submodules: recursive
 
