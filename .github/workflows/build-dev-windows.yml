@@ -4,8 +4,13 @@ on:
   repository_dispatch:
     types: [new_edge_build]
   workflow_dispatch:
-  schedule:
-    - cron: '25 0,12 * * *'
+    inputs:
+      debug:
+        description: "Upload project to Artifacts"
+        default: false
+        type: boolean
+  # schedule:
+  #   - cron: '25 0,12 * * *'
 
 concurrency:
   group: windows-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -15,6 +20,8 @@ env:
   platform: "Windows"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
+  repositoryAuthor: YARC-Official
+  repositoryName: YARG
   branch: "rewrite"
 
 permissions:
@@ -88,7 +95,7 @@ jobs:
       - name: "[Pre-install] Pull project"
         uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
-          repository: YARC-Official/YARG
+          repository: ${{ env.repositoryAuthor }}/${{ env.repositoryName }}
           ref: ${{ env.branch }}
           submodules: recursive
 
@@ -176,11 +183,30 @@ jobs:
       ###########################
       #         Upload          #
       ###########################
-      # - name: "[Post-build] Upload to artifacts"
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Windows x64
-      #     path: Release
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Upload project to artifacts for debugging"
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS Universal - Overall Project
+          path: |
+            **/*
+            !Library
+            !YARG.Core
+            !build
+
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Compress library folder for upload"
+        continue-on-error: true
+        run: Compress-Archive -Path ${{ github.workspace }}/Library/* -DestinationPath ${{ github.workspace }}/Library.zip;
+
+      - if: ${{ inputs.debug == true }}
+        name: "[Debug] Upload library to artifacts for debugging"
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS Universal - Library folder
+          path: Library.zip
 
       - name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2

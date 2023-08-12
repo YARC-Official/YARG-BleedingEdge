@@ -6,21 +6,22 @@ on:
   workflow_dispatch:
     inputs:
       debug:
-        description: "Debug mode"
+        description: "Upload project to Artifacts"
         default: false
         type: boolean
-  schedule:
-    - cron: '25 0,12 * * *'
+  # schedule:
+  #   - cron: '25 0,12 * * *'
 
-# concurrency:
-#   group: mac-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: mac-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   platform: "MacOS"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
-  repository: Pantotone/YARG
+  repositoryAuthor: YARC-Official
+  repositoryName: YARG
   branch: "rewrite"
 
 permissions:
@@ -66,7 +67,7 @@ jobs:
       - name: "[Pre-install] Pull project"
         uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
-          repository: ${{ env.repository }}
+          repository: ${{ env.repositoryAuthor }}/${{ env.repositoryName }}
           ref: ${{ env.branch }}
           submodules: recursive
 
