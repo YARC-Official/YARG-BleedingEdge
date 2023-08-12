@@ -162,6 +162,7 @@ jobs:
       ###########################
       - if: ${{ inputs.debug == true }}
         name: "[Debug] Upload project to artifacts for debugging"
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: MacOS Universal - Overall Project
@@ -173,10 +174,12 @@ jobs:
 
       - if: ${{ inputs.debug == true }}
         name: "[Debug] Compress library folder for upload"
+        continue-on-error: true
         run: zip -r Library.zip Library
 
       - if: ${{ inputs.debug == true }}
         name: "[Debug] Upload library to artifacts for debugging"
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: MacOS Universal - Library folder
