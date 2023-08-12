@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  version: ${{ github.event.client_payload.version || inputs.version }}
+  buildVersion: ${{ github.event.client_payload.version || inputs.version }}
   platform: "Linux"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
@@ -188,7 +188,7 @@ jobs:
       #        Compress         #
       ###########################
       - name: "[Post-build] Compress to a .zip"
-        run: mkdir Release && (cd build && zip -r ../Release/YARG_${{ env.version || steps.latestCommit.outputs.commitSHA }}-Linux-x64.zip .)
+        run: mkdir Release && (cd build && zip -r ../Release/YARG_${{ env.buildVersion || steps.latestCommit.outputs.commitSHA }}-Linux-x64.zip .)
         
       ###########################
       #         Upload          #
@@ -218,13 +218,12 @@ jobs:
           name: MacOS Universal - Library folder
           path: Library.zip
 
-      - if: ${{ inputs.debug == false }}
-        name: "[Post-build] Upload to releases"
+      - name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: New Engine alpha build - ${{ env.version || steps.latestCommit.outputs.commitSHA }}
-          tag: ${{ env.version || steps.latestCommit.outputs.commitShortSHA }}
+          release_name: New Engine alpha build - ${{ env.buildVersion || steps.latestCommit.outputs.commitSHA }}
+          tag: ${{ env.buildVersion || steps.latestCommit.outputs.commitShortSHA }}
           prerelease: true
           file: Release/*
           file_glob: true
