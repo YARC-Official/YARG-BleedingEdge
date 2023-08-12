@@ -14,6 +14,13 @@ on:
         description: "Upload project to Artifacts"
         default: false
         type: boolean
+  workflow_call:
+    inputs:
+      version:
+        description: "Version (\"aX\" / \"a24\")"
+        default: "SomeoneForgotToPutTheVersion"
+        required: true
+        type: string
   # schedule:
   #   - cron: '25 0,12 * * *'
 

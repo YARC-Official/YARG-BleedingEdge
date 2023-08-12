@@ -9,26 +9,21 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
-
 jobs:
-  trigger:
-    name: "Triggering workflows"
-    runs-on: "ubuntu-latest"
-    steps: 
-      - name: "Triggering other workflows"
-        uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ inputs.version }}
-        with:
-          script: |
-            github.rest.repos.createDispatchEvent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              event_type: "new_edge_build",
-              client_payload: {
-                "version": process.env.VERSION
-              }
-            });
+  linux-builder:
+    name: "Build - Linux"
+    uses: ./.github/workflows/build-dev-linux.yml
+    with:
+      version: ${{ inputs.version }}
+
+  windows-builder:
+    name: "Build - Windows"
+    uses: ./.github/workflows/build-dev-windows.yml
+    with:
+      version: ${{ inputs.version }}
+
+  mac-builder:
+    name: "Build - MacOS"
+    uses: ./.github/workflows/build-dev-mac.yml
+    with:
+      version: ${{ inputs.version }}
