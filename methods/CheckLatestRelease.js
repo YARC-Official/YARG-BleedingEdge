@@ -42,7 +42,7 @@ If you want the most stable version, [click here](https://github.com/YARC-Offici
 Downloads are below.
 
 
-## 📋 Changes
+## 📋 Commits
 
 ${formatMessages(devCommits)}
 `;

@@ -1,0 +1,34 @@
+name: Trigger a new edge build (all platforms)
+
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (\"aX\" / \"a24\")"
+        default: "a"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  trigger:
+    name: "Triggering workflows"
+    runs-on: "ubuntu-latest"
+    steps: 
+      - name: "Triggering other workflows"
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        with:
+          script: |
+            github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: "new_edge_build",
+              client_payload: {
+                "version": process.env.VERSION
+              }
+            });

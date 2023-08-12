@@ -5,6 +5,11 @@ on:
     types: [new_edge_build]
   workflow_dispatch:
     inputs:
+      version:
+        description: "Version (\"aX\" / \"a24\")"
+        default: "a"
+        required: true
+        type: string
       debug:
         description: "Upload project to Artifacts"
         default: false
@@ -17,6 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  version: ${{ github.event.client_payload.version || inputs.version }}
   platform: "MacOS"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
@@ -57,7 +63,7 @@ jobs:
   macBuilder:
     name: Mac Build
     needs: [check]
-    if: needs.check.outputs.runBuild == 'true'
+    # if: needs.check.outputs.runBuild == 'true'
     runs-on: macos-latest
 
     steps:
@@ -155,7 +161,7 @@ jobs:
       #        Compress         #
       ###########################
       - name: "[Post-build] Compress to a .zip"
-        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ steps.latestCommit.outputs.commitSHA }}-MacOS-Universal.zip
+        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ env.version || steps.latestCommit.outputs.commitSHA }}-MacOS-Universal.zip
         
       ###########################
       #         Upload          #
@@ -185,12 +191,14 @@ jobs:
           name: MacOS Universal - Library folder
           path: Library.zip
 
-      - name: "[Post-build] Upload to releases"
+      - if: ${{ inputs.debug == false }}
+        name: "[Post-build] Upload to releases"
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: Nightly Build - ${{ steps.latestCommit.outputs.commitSHA }}
-          tag: ${{ steps.latestCommit.outputs.commitShortSHA }}
+          release_name: New Engine alpha build - ${{ env.version || steps.latestCommit.outputs.commitSHA }}
+          tag: ${{ env.version || steps.latestCommit.outputs.commitShortSHA }}
+          prerelease: true
           file: Release/*
           file_glob: true
           body: ${{ needs.check.outputs.messageBody }}
