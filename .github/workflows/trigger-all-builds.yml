@@ -1,4 +1,4 @@
-name: Trigger a new edge build (all platforms)
+name: Create a new pre-release build
 
 on: 
   workflow_dispatch:
