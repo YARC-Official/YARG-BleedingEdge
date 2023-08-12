@@ -13,6 +13,7 @@ jobs:
   linux-builder:
     name: "Build - Linux"
     uses: ./.github/workflows/build-dev-linux.yml
+    secrets: inherit
     permissions:
       contents: write
     with:
@@ -21,6 +22,7 @@ jobs:
   windows-builder:
     name: "Build - Windows"
     uses: ./.github/workflows/build-dev-windows.yml
+    secrets: inherit
     permissions:
       contents: write
     with:
@@ -29,6 +31,7 @@ jobs:
   mac-builder:
     name: "Build - MacOS"
     uses: ./.github/workflows/build-dev-mac.yml
+    secrets: inherit
     permissions:
       contents: write
     with:
