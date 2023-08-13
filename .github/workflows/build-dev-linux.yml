@@ -41,35 +41,35 @@ permissions:
   contents: write
 
 jobs:
-  check:
-    name: "Check for releases"
-    runs-on: ubuntu-latest
-    outputs: 
-      runBuild: ${{ steps.check-latest-output.outputs.runBuild }}
-      messageBody: ${{ steps.check-latest-output.outputs.messageBody }}
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v3
+  # check:
+  #   name: "Check for releases"
+  #   runs-on: ubuntu-latest
+  #   outputs: 
+  #     runBuild: ${{ steps.check-latest-output.outputs.runBuild }}
+  #     messageBody: ${{ steps.check-latest-output.outputs.messageBody }}
+  #   steps:
+  #     - name: "Checkout"
+  #       uses: actions/checkout@v3
 
-      - name: "Setup Node"
-        uses: actions/setup-node@v3
-        with:
-          node-version: latest
-          cache: npm
+  #     - name: "Setup Node"
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: latest
+  #         cache: npm
 
-      - name: "Install dependencies"
-        run: npm i
+  #     - name: "Install dependencies"
+  #       run: npm i
 
-      - name: "Check for latest release / Save information to output"
-        id: check-latest-output
-        run: node methods/CheckLatestRelease.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PLATFORM: ${{ env.platform }}
+  #     - name: "Check for latest release / Save information to output"
+  #       id: check-latest-output
+  #       run: node methods/CheckLatestRelease.js
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         PLATFORM: ${{ env.platform }}
 
   linuxBuilder:
     name: Linux Build
-    needs: [check]
+    # needs: [check]
     # if: needs.check.outputs.runBuild == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -234,4 +234,7 @@ jobs:
           prerelease: true
           file: Release/*
           file_glob: true
-          body: ${{ needs.check.outputs.messageBody }}
+          body: |
+            Built using the commit https://github.com/YARC-Official/YARG/commit/${{ steps.latestCommit.outputs.commitSHA }}
+            
+            ${{ vars.RELEASE_BODYMESSAGE || '' }}
