@@ -185,6 +185,15 @@ jobs:
           dotnet build YARG.Core/YARG.Core/YARG.Core.csproj /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary --output Assets/Plugins/YARG.Core;
 
       ###########################
+      # Add build  symbols file #
+      ###########################
+      - name: "[Pre-build] Create a csc.rsp file"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+
+      ###########################
       #          Build          #
       ###########################
       - name: "[Build] Run Builder"
