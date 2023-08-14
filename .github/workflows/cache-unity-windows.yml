@@ -1,0 +1,38 @@
+name: Cache Unity 2021.3.21f1 for Windows
+
+on:
+  workflow_dispatch:
+
+env:
+  unityVersion: "2021.3.21f1"
+  unityVersionHash: "1b156197d683"
+
+jobs:
+  cacheUnity:
+    name: Cache Unity 2021.3.21f1 for Windows
+    runs-on: windows-2019
+    timeout-minutes: 90
+
+    steps:
+      - name: "Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
+        id: unity-install
+        uses: actions/cache@v3.2.2
+        with: 
+          path: ${{ runner.temp }}/Unity
+          key: windows-unity-${{ env.unityVersion }}
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "Download Unity Editor + Windows IL2CPP builder"
+        continue-on-error: true
+        run: >
+          mkdir ${{ runner.temp }}\UnityInstall;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/Windows64EditorInstaller/UnitySetup64-${{ env.unityVersion }}.exe;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/TargetSupportInstaller/UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe;
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "Install Unity"
+        run: >
+          $UNITY_INSTALLARGUMENTS = "/S /D=${{ runner.temp }}\\Unity";
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Remove-Item -Recurse -Force -Path ${{ runner.temp }}\UnityInstall\*;
