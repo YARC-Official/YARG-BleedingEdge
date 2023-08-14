@@ -1,4 +1,4 @@
-name: Create a new pre-release build
+name: Create a new release build
 
 on: 
   workflow_dispatch:
@@ -8,6 +8,10 @@ on:
         default: "a"
         required: true
         type: string
+      prerelease:
+        description: "Set as pre-release"
+        default: true
+        type: boolean
 
 jobs:
   linux-builder:
@@ -18,6 +22,7 @@ jobs:
       contents: write
     with:
       version: ${{ inputs.version }}
+      prerelease: ${{ inputs.prerelease }}
 
   windows-builder:
     name: "Build - Windows"
@@ -27,6 +32,7 @@ jobs:
       contents: write
     with:
       version: ${{ inputs.version }}
+      prerelease: ${{ inputs.prerelease }}
 
   mac-builder:
     name: "Build - MacOS"
@@ -36,3 +42,4 @@ jobs:
       contents: write
     with:
       version: ${{ inputs.version }}
+      prerelease: ${{ inputs.prerelease }}
