@@ -203,8 +203,8 @@ jobs:
       #Replace icon with nightly#
       ###########################
       - name: "[Pre-build] Replace icon with Nightly/Development"
-        run: "replace bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
-
+        shell: bash
+        run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
 
       ###########################
       #          Build          #
