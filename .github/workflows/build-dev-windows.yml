@@ -129,6 +129,12 @@ jobs:
           "commitSHA=$(git show-ref | grep refs/remotes/origin/${{ env.branch }} | cut -c1-40)" >> $env:GITHUB_OUTPUT;
           "commitShortSHA=$(git show-ref | grep refs/remotes/origin/${{ env.branch }} | cut -c1-7)" >> $env:GITHUB_OUTPUT;
 
+      - name: "[Pre-install] Pull bleeding-edge repo"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          path: bleedingedge
+
       ###########################
       #          Cache          #
       ###########################
@@ -192,6 +198,13 @@ jobs:
         run: >
           touch Assets/csc.rsp &&
           echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+
+      ###########################
+      #Replace icon with nightly#
+      ###########################
+      - name: "[Pre-build] Replace icon with Nightly/Development"
+        run: "replace bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
+
 
       ###########################
       #          Build          #
