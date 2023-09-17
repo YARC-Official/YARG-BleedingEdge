@@ -41,7 +41,7 @@ env:
   platform: "MacOS"
   unityVersion: "2021.3.21f1"
   unityVersionHash: "1b156197d683"
-  repositoryAuthor: YARC-Official
+  repositoryAuthor: Pantotone
   repositoryName: YARG
   branch: "rewrite"
 
