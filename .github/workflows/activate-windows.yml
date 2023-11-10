@@ -1,4 +1,4 @@
-name: Request Activation File (Windows environment)
+name: 🔑 Request Activation File (Windows environment)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ env:
 
 jobs:
   requestActivationFile:
-    name: Request Activation File
+    name: 🔑 Request Activation File
     runs-on: windows-2019
     timeout-minutes: 90
 

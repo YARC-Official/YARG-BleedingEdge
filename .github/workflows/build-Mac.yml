@@ -14,7 +14,7 @@ env:
 
   repositoryAuthor: "YARC-Official"
   repositoryName: "YARG"
-  branch: "rewrite"
+  branch: "dev"
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
       platform: "MacOS"
       repositoryAuthor: "YARC-Official"
       repositoryName: "YARG"
-      repositoryBranch: "rewrite"
+      repositoryBranch: "dev"
 
   macBuilder:
     needs: [check]

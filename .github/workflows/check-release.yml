@@ -1,4 +1,4 @@
-name: 🔘 Checks for releases
+name: ✅ Checks for releases
 
 on: 
   workflow_call:

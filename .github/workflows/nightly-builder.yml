@@ -1,4 +1,4 @@
-name: 🔨🤖 Automatic Nightly Builder
+name: 🤖🔨 Automatic Nightly Builder
 
 on: 
   schedule:
