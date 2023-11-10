@@ -33,7 +33,7 @@ function formatMessages(devCommits) {
 };
 
 const messageBody = 
-`Built using the commit https://github.com/YARC-Official/YARG/commit/${latestDevCommit.sha}
+`Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit.sha}
 
 
 ### ⚠️ This build is an extremely early beta, so bugs are expected. ⚠️
@@ -48,3 +48,5 @@ ${formatMessages(devCommits)}
 `;
 
 core.setOutput("messageBody", devCommits.length > 0 ? messageBody : latestRelease.body);
+core.setOutput("latestSHA", latestDevCommit.sha);
+core.setOutput("tagName", latestDevCommit.sha.substring(0, 7));

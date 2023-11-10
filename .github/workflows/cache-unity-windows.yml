@@ -1,4 +1,4 @@
-name: Cache Unity 2021.3.21f1 for Windows
+name: 📦 Cache Unity 2021.3.21f1 for Windows
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v3.2.2
         with: 
           path: ${{ runner.temp }}/Unity
-          key: windows-unity-${{ env.unityVersion }}
+          key: Windows_Unity-${{ env.unityVersion }}
 
       - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
         name: "Download Unity Editor + Windows IL2CPP builder"
