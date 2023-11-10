@@ -1,8 +1,8 @@
 import { GetCommits, GetLatestRelease, GetLatestCommit } from "../utils/Github.js";
-import { YARG_BLEEDINGEDGEREPOSITORY, YARG_DEVBRANCH, YARG_GAMEREPOSITORY, YARG_ORGANIZATIONNAME } from "../utils/const.js";
+import { BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME, YARG_DEVBRANCH, YARG_GAMEREPOSITORY, YARG_ORGANIZATIONNAME } from "../utils/const.js";
 import * as core from '@actions/core';
 
-const latestRelease = await GetLatestRelease(YARG_ORGANIZATIONNAME, YARG_BLEEDINGEDGEREPOSITORY);
+const latestRelease = await GetLatestRelease(BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME);
 const latestDevCommit = await GetLatestCommit(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH);
 const devCommits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH, latestRelease.published_at);
 

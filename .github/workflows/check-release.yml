@@ -55,6 +55,8 @@ jobs:
           REPOSITORY_AUTHOR: ${{ inputs.repositoryAuthor }}
           REPOSITORY_NAME: ${{ inputs.repositoryName }}
           REPOSITORY_BRANCH: ${{ inputs.repositoryBranch }}
+          BLEEDINGEDGE_REPOSITORYAUTHOR: ${{ github.repository_owner }}
+          BLEEDINGEDGE_REPOSITORYNAME: ${{ github.event.repository.name }}
     outputs: 
       runBuild: ${{ steps.check-latest-output.outputs.runBuild }}
       latestSHA: ${{ steps.check-latest-output.outputs.latestSHA }}
