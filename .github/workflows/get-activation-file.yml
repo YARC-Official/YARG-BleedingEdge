@@ -1,0 +1,126 @@
+name: 🔑 Request Activation File
+
+on:
+  workflow_dispatch:
+
+env:
+  unityVersion: "2021.3.21f1"
+  unityVersionHash: "1b156197d683"
+
+jobs:
+  windows-requestActivationFile:
+    name: 🔑 Windows - Request Activation File
+    runs-on: windows-2019
+    timeout-minutes: 90
+
+    steps:
+      - name: "Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
+        id: unity-install
+        uses: actions/cache@v3.2.2
+        with: 
+          path: ${{ runner.temp }}/Unity
+          key: Windows_Unity-${{ env.unityVersion }}
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "Download Unity Editor + Windows IL2CPP builder"
+        continue-on-error: true
+        run: >
+          mkdir ${{ runner.temp }}\UnityInstall;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/Windows64EditorInstaller/UnitySetup64-${{ env.unityVersion }}.exe;
+          curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/TargetSupportInstaller/UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe;
+
+      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
+        name: "Install Unity"
+        run: >
+          $UNITY_INSTALLARGUMENTS = "/S /D=${{ runner.temp }}\\Unity";
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
+          Remove-Item -Recurse -Force -Path ${{ runner.temp }}\UnityInstall\*;
+
+      - name: "Check if folder exists"
+        run: ls ${{ runner.temp }}/Unity
+
+      - name: "Request file"
+        run: ${{ runner.temp }}/Unity/Editor/Unity.exe -batchmode -createManualActivationFile -logfile
+
+      - name: "Upload to artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows - Activation File
+          path: ${{ github.workspace }}
+
+  linux-requestActivationFile:
+    name: 🔑 Linux - Request Activation File
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+
+      #############################
+      #       Install Unity       #
+      #############################
+
+      - name: "[Install] Install dependencies"
+        run: |
+          sudo apt-get -q update &&
+          sudo apt-get -q install -y --no-install-recommends apt-utils &&
+          sudo apt-get -q install -y --no-install-recommends --allow-downgrades ca-certificates libasound2 libc6-dev libcap2 libgconf-2-4 libglu1 libgtk-3-0 libncurses5 libnotify4 libnss3 libxtst6 libxss1 cpio lsb-release xvfb xz-utils && 
+          sudo apt-get clean && 
+          sudo rm -rf /var/lib/apt/lists/* &&
+          sudo apt-get -q update &&
+          sudo apt-get -q install -y --no-install-recommends software-properties-common &&
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
+          sudo apt-get -q install -y --only-upgrade libstdc++6 &&
+          sudo add-apt-repository -y --remove ppa:ubuntu-toolchain-r/test &&
+          sudo apt-get -q remove -y --auto-remove software-properties-common &&
+          sudo apt-get clean &&
+          sudo rm -rf /var/lib/apt/lists/*
+
+      - name: "[Install] Download Unity Editor + Linux IL2CPP builder"
+        run: |
+          mkdir ${{ runner.temp }}/UnityInstall &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorInstaller/Unity-${{ env.unityVersion }}.tar.xz &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorTargetInstaller/UnitySetup-Linux-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.tar.xz
+
+      - name: "[Install] Install Unity Editor + Linux IL2CPP builder"
+        run: |
+          mkdir "${{ runner.temp }}/Unity" &&
+          tar -xvf "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.tar.xz" -C "${{ runner.temp }}/Unity" &&
+          tar -xvf "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz" -C "${{ runner.temp }}/Unity" &&
+          rm -rf "${{ runner.temp }}/UnityInstall"
+
+      - name: "[Build] Run Builder"
+        run: ${{ runner.temp }}/Unity/Editor/Unity -quit -batchmode -createManualActivationFile -logfile -
+
+      - name: "Upload to artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux - Activation File
+          path: ${{ github.workspace }}
+
+  mac-requestActivationFile:
+    name: 🔑 MacOS - Request Activation File
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: "[Install] Download Unity Editor + Mac IL2CPP builder"
+        run: |
+          mkdir ${{ runner.temp }}/UnityInstall &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg        
+
+      - name: "[Install] Install Unity Editor + Mac IL2CPP builder"
+        run: |
+          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" -target "/" -verbose &&
+          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" -target "/" -verbose &&
+          rm -rf "${{ runner.temp }}/UnityInstall"
+
+      - name: "[Build] Run Builder"
+        run: /Applications/Unity/Unity.app/Contents/MacOS/Unity -quit -batchmode -createManualActivationFile -logfile -
+
+      - name: "Upload to artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS - Activation File
+          path: ${{ github.workspace }}
