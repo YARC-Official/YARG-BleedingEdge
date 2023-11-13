@@ -99,6 +99,15 @@ jobs:
 
 
       #############################
+      #  Add Nightly definition   #
+      #############################
+      - name: "[Pre-build] Create a csc.rsp file"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
+
+      #############################
       #      Install Blender      #
       #############################
 
