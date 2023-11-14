@@ -175,7 +175,7 @@ jobs:
 
       - name: "[Post-build] Return license"
         continue-on-error: true
-        run: ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.WINDOWS_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile | Out-Host;
+        run: ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile | Out-Host;
 
 
       #############################
