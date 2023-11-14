@@ -179,6 +179,10 @@ jobs:
       - name: "[Post-build] Remove YARG_BurstDebugInformation_DoNotShip"
         run: (cd build && rm -rf YARG_BurstDebugInformation_DoNotShip)
 
+      - name: "[Post-build] Return license"
+        continue-on-error: true
+        run: ${{ runner.temp }}/Unity/Editor/Unity -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.LINUX_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.LINUX_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.LINUX_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
+
 
       #############################
       #         Compress          #
