@@ -14,7 +14,7 @@ env:
 
   repositoryAuthor: "YARC-Official"
   repositoryName: "YARG"
-  branch: "themes"
+  branch: "dynamic-window"
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
       platform: "MacOS"
       repositoryAuthor: "YARC-Official"
       repositoryName: "YARG"
-      repositoryBranch: "themes"
+      repositoryBranch: "dynamic-window"
 
   macBuilder:
     needs: [check]
