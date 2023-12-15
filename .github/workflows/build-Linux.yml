@@ -14,7 +14,7 @@ env:
 
   repositoryAuthor: "YARC-Official"
   repositoryName: "YARG"
-  branch: "dynamic-window"
+  branch: "dev"
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
       platform: "Linux"
       repositoryAuthor: "YARC-Official"
       repositoryName: "YARG"
-      repositoryBranch: "dynamic-window"
+      repositoryBranch: "dev"
 
   linuxBuilder:
     needs: [check]
