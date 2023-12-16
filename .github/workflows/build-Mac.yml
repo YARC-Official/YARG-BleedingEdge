@@ -3,6 +3,48 @@ name: 🔨 Build - Mac
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      versionName:
+        description: "Version Name"
+        type: string
+        required: true
+      nightly:
+        description: "Nightly Build"
+        type: boolean
+        default: false
+
+      # Inputs - Base Game repository
+      gameRepositoryAuthor:
+        description: "Base Game - Repository Author"
+        default: "YARC-Official"
+        type: string
+      gameRepositoryName:
+        description: "Base Game - Repository Name"
+        default: "YARG"
+        type: string
+      gameRepositoryBranch:
+        description: "Base Game - Repository Branch"
+        default: "dev"
+        type: string
+
+      # Inputs - YARG.Core repository
+      coreRepositoryAuthor:
+        description: "YARG.Core - Repository Author"
+        default: "YARC-Official"
+        type: string
+      coreRepositoryName:
+        description: "YARG.Core - Repository Name"
+        default: "YARG.Core"
+        type: string
+      coreRepositoryBranch:
+        description: "YARG.Core - Repository Branch"
+        default: "master"
+        type: string
+
+    outputs:
+      artifactId:
+        description: "Artifact ID"
+        value: ${{ jobs.macBuilder.outputs.artifactId }}
 
 env:
   platform: "MacOS"
@@ -12,26 +54,19 @@ env:
   blenderMajorVersion: "3.4"
   blenderVersion: "3.4.1"
 
-  repositoryAuthor: "YARC-Official"
-  repositoryName: "YARG"
-  branch: "dev"
+  gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
+  gameRepositoryName: ${{ inputs.gameRepositoryName }}
+  gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}
+
+  coreRepositoryAuthor: ${{ inputs.coreRepositoryAuthor }}
+  coreRepositoryName: ${{ inputs.coreRepositoryName }}
+  coreRepositoryBranch: ${{ inputs.coreRepositoryBranch }}
 
 permissions:
   contents: write
 
 jobs:
-  check:
-    uses: ./.github/workflows/check-release.yml
-    with: 
-      platform: "MacOS"
-      repositoryAuthor: "YARC-Official"
-      repositoryName: "YARG"
-      repositoryBranch: "dev"
-
   macBuilder:
-    needs: [check]
-    if: needs.check.outputs.runBuild == 'true'
-
     name: 🔨 Build - MacOS
     runs-on: macos-latest
     timeout-minutes: 90
@@ -45,12 +80,19 @@ jobs:
       - name: "[Pre-install] Pull project"
         uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
-          repository: ${{ env.repositoryAuthor }}/${{ env.repositoryName }}
-          ref: ${{ env.branch }}
+          repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
+          ref: ${{ env.gameRepositoryBranch }}
           submodules: recursive
 
       - name: "[Pre-install] Pull latest submodules"
         run: git submodule update
+
+      - name: "[Pre-install] Pull YARG.Core"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
+          ref: ${{ env.coreRepositoryBranch }}
+          path: YARG.Core
 
       - name: "[Pre-install] Pull bleeding-edge repository"
         uses: actions/checkout@v3
@@ -73,7 +115,8 @@ jobs:
       #############################
       #  Add Nightly definition   #
       #############################
-      - name: "[Pre-build] Create a csc.rsp file"
+      - if: ${{ inputs.nightly == 'true' }}
+        name: "[Pre-build] Create a csc.rsp file"
         shell: bash
         run: >
           touch Assets/csc.rsp &&
@@ -115,7 +158,8 @@ jobs:
       # Replace icon with nightly #
       #############################
 
-      - name: "[Pre-build] Replace icon with Nightly/Development"
+      - if: ${{ inputs.nightly == 'true' }}
+        name: "[Pre-build] Replace icon with Nightly/Development"
         run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
 
 
@@ -159,19 +203,19 @@ jobs:
       #############################
 
       - name: "[Post-build] Compress to a .zip"
-        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ needs.check.outputs.latestSHA }}-MacOS-Universal.zip
+        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ inputs.versionName }}-MacOS-Universal.zip
         
 
       #############################
       #          Upload           #
       #############################
 
-      - name: "[Post-build] Upload to releases"
-        uses: svenstaro/upload-release-action@v2
+      - name: "[Post-build] Upload to artifacts"
+        id: artifacts
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: Nightly Build - ${{ needs.check.outputs.latestSHA }}
-          tag: ${{ needs.check.outputs.tagName }}
-          file: Release/*
-          file_glob: true
-          body: ${{ needs.check.outputs.messageBody }}
+          name: YARG_${{ inputs.versionName }}-MacOS-Universal.zip
+          path: Release/*
+
+    outputs: 
+      artifactId: ${{ steps.artifacts.outputs.artifact-id }}

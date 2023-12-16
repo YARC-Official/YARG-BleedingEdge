@@ -6,23 +6,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-builder:
-    name: "🔨 Build - Linux"
-    uses: ./.github/workflows/build-Linux.yml
-    secrets: inherit
-    permissions:
-      contents: write
+  # linux-builder:
+  #   name: "🔨 Build - Linux"
+  #   uses: ./.github/workflows/build-Linux.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: write
 
   mac-builder:
     name: "🔨 Build - MacOS"
     uses: ./.github/workflows/build-Mac.yml
     secrets: inherit
+    with: 
+      versionName: "test"
+      nightly: true
     permissions:
       contents: write
 
-  windows-builder:
-    name: "🔨 Build - Windows"
-    uses: ./.github/workflows/build-Windows.yml
-    secrets: inherit
-    permissions:
-      contents: write
+  # windows-builder:
+  #   name: "🔨 Build - Windows"
+  #   uses: ./.github/workflows/build-Windows.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: write
