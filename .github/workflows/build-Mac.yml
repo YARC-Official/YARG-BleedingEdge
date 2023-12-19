@@ -28,6 +28,10 @@ on:
         type: string
 
       # Inputs - YARG.Core repository
+      customCoreRepository:
+        description: "Using custom YARG.Core repository/branch"
+        type: boolean
+        default: false
       coreRepositoryAuthor:
         description: "YARG.Core - Repository Author"
         default: "YARC-Official"
@@ -89,7 +93,8 @@ jobs:
       - name: "[Pre-install] Pull latest submodules"
         run: git submodule update
 
-      - name: "[Pre-install] Pull YARG.Core"
+      - if: ${{ inputs.customCoreRepository == true }}
+        name: "[Pre-install] Pull YARG.Core"
         uses: actions/checkout@v3
         with:
           repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
