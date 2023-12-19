@@ -54,6 +54,8 @@ env:
   blenderMajorVersion: "3.4"
   blenderVersion: "3.4.1"
 
+  versionName: ${{ inputs.versionName }}
+
   gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
   gameRepositoryName: ${{ inputs.gameRepositoryName }}
   gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}
@@ -115,7 +117,7 @@ jobs:
       #############################
       #  Add Nightly definition   #
       #############################
-      - if: ${{ inputs.nightly == 'true' }}
+      - if: ${{ inputs.nightly == true }}
         name: "[Pre-build] Create a csc.rsp file"
         shell: bash
         run: >
@@ -158,7 +160,7 @@ jobs:
       # Replace icon with nightly #
       #############################
 
-      - if: ${{ inputs.nightly == 'true' }}
+      - if: ${{ inputs.nightly == true }}
         name: "[Pre-build] Replace icon with Nightly/Development"
         run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
 
@@ -203,7 +205,7 @@ jobs:
       #############################
 
       - name: "[Post-build] Compress to a .zip"
-        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ inputs.versionName }}-MacOS-Universal.zip
+        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ env.versionName }}-MacOS-Universal.zip
         
 
       #############################
@@ -214,7 +216,7 @@ jobs:
         id: artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: YARG_${{ inputs.versionName }}-MacOS-Universal.zip
+          name: YARG (${{ env.versionName }}) - ${{ env.platform }}
           path: Release/*
 
     outputs: 
