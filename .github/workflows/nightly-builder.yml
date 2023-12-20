@@ -67,6 +67,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           release_name: Nightly Build - ${{ needs.check.outputs.latestSHA }}
           tag: ${{ needs.check.outputs.tagName }}
-          file: Release/*
+          file: builds/*
           file_glob: true
           body: ${{ needs.check.outputs.messageBody }}
