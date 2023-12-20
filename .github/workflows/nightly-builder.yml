@@ -6,12 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  # linux-builder:
-  #   name: "🔨 Build - Linux"
-  #   uses: ./.github/workflows/build-Linux.yml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: write
+  linux-builder:
+    name: "🔨 Build - Linux"
+    uses: ./.github/workflows/build-Linux.yml
+    secrets: inherit
+    with: 
+      versionName: "test"
+      nightly: true
 
   mac-builder:
     name: "🔨 Build - MacOS"
