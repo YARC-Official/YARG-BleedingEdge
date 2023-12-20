@@ -3,9 +3,6 @@ name: ✅ Checks for releases
 on: 
   workflow_call:
     inputs:
-      platform:
-        description: "Platform Type"
-        type: string
       repositoryAuthor:
         description: "Repository Author"
         type: string
@@ -16,9 +13,15 @@ on:
         description: "Repository Branch"
         type: string
     outputs:
-      runBuild:
-        description: "If build should occour"
-        value: ${{ jobs.check.outputs.runBuild }}
+      macBuild:
+        description: "If Mac build should occour"
+        value: ${{ jobs.check.outputs.macBuild }}
+      windowsBuild:
+        description: "If Windows build should occour"
+        value: ${{ jobs.check.outputs.windowsBuild }}
+      linuxBuild:
+        description: "If Linux build should occour"
+        value: ${{ jobs.check.outputs.linuxBuild }}
       tagName:
         description: "Name to be used on release tag"
         value: ${{ jobs.check.outputs.tagName }}
@@ -51,14 +54,15 @@ jobs:
         run: node methods/CheckLatestRelease.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PLATFORM: ${{ inputs.platform }}
           REPOSITORY_AUTHOR: ${{ inputs.repositoryAuthor }}
           REPOSITORY_NAME: ${{ inputs.repositoryName }}
           REPOSITORY_BRANCH: ${{ inputs.repositoryBranch }}
           BLEEDINGEDGE_REPOSITORYAUTHOR: ${{ github.repository_owner }}
           BLEEDINGEDGE_REPOSITORYNAME: ${{ github.event.repository.name }}
     outputs: 
-      runBuild: ${{ steps.check-latest-output.outputs.runBuild }}
+      macBuild: ${{ steps.check-latest-output.outputs.macBuild }}
+      windowsBuild: ${{ steps.check-latest-output.outputs.windowsBuild }}
+      linuxBuild: ${{ steps.check-latest-output.outputs.linuxBuild }}
       latestSHA: ${{ steps.check-latest-output.outputs.latestSHA }}
       tagName: ${{ steps.check-latest-output.outputs.tagName }}
       messageBody: ${{ steps.check-latest-output.outputs.messageBody }}
