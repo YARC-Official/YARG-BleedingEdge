@@ -23,9 +23,12 @@ jobs:
     permissions:
       contents: write
 
-  # windows-builder:
-  #   name: "🔨 Build - Windows"
-  #   uses: ./.github/workflows/build-Windows.yml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: write
+  windows-builder:
+    name: "🔨 Build - Windows"
+    uses: ./.github/workflows/build-Windows.yml
+    secrets: inherit
+    with: 
+      versionName: "test"
+      nightly: true
+    permissions:
+      contents: write
