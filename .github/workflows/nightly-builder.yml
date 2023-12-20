@@ -20,8 +20,6 @@ jobs:
     with: 
       versionName: "test"
       nightly: true
-    permissions:
-      contents: write
 
   windows-builder:
     name: "🔨 Build - Windows"
@@ -30,5 +28,3 @@ jobs:
     with: 
       versionName: "test"
       nightly: true
-    permissions:
-      contents: write
