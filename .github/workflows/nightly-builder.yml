@@ -1,31 +1,72 @@
 name: 🤖🔨 Automatic Nightly Builder
 
 on: 
-  # schedule:
-  #   - cron: '25 0,12 * * *'
+  schedule:
+    - cron: '25 0,12 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
+  check:
+    uses: ./.github/workflows/check-release.yml
+    with: 
+      repositoryAuthor: "YARC-Official"
+      repositoryName: "YARG"
+      repositoryBranch: "dev"
+
   linux-builder:
+    needs: [check]
+    if: needs.check.outputs.linuxBuild == 'true'
+    
     name: "🔨 Build - Linux"
     uses: ./.github/workflows/build-Linux.yml
     secrets: inherit
     with: 
-      versionName: "test"
+      versionName: ${{ needs.check.outputs.latestSHA }}
       nightly: true
 
   mac-builder:
+    needs: [check]
+    if: needs.check.outputs.macBuild == 'true'
+
     name: "🔨 Build - MacOS"
     uses: ./.github/workflows/build-Mac.yml
     secrets: inherit
     with: 
-      versionName: "test"
+      versionName: ${{ needs.check.outputs.latestSHA }}
       nightly: true
 
   windows-builder:
+    needs: [check]
+    if: needs.check.outputs.windowsBuild == 'true'
+
     name: "🔨 Build - Windows"
     uses: ./.github/workflows/build-Windows.yml
     secrets: inherit
     with: 
-      versionName: "test"
+      versionName: ${{ needs.check.outputs.latestSHA }}
       nightly: true
+
+  publish:
+    needs: [check, linux-builder, mac-builder, windows-builder]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps: 
+      - name: "Download builds from artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: builds
+          pattern: YARG (*) - *
+      
+      - name: "[Post-build] Upload to releases"
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          release_name: Nightly Build - ${{ needs.check.outputs.latestSHA }}
+          tag: ${{ needs.check.outputs.tagName }}
+          file: Release/*
+          file_glob: true
+          body: ${{ needs.check.outputs.messageBody }}
