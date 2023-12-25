@@ -51,7 +51,6 @@ jobs:
 
   publish:
     needs: [check, linux-builder, mac-builder, windows-builder]
-    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps: 
       - name: "Download builds from artifacts"
