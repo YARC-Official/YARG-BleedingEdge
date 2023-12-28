@@ -187,10 +187,10 @@ jobs:
       #     Restore  Packages     #
       #############################
 
-      - name: "[Pre-install] Install dotnet 7.x"
-        uses: actions/setup-dotnet@v3
+      - name: "[Pre-install] Install dotnet 8.x"
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '8.0.x'
 
       - name: "[Pre-install] Restoring NuGet Packages"
         run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
