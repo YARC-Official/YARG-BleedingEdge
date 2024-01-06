@@ -7,10 +7,11 @@ on:
         description: "Version Name"
         type: string
         required: true
-      nightly:
-        description: "Nightly Build"
-        type: boolean
-        default: false
+      buildType:
+        description: "Build Type"
+        type: string
+        required: true
+        default: "development"
 
       # Inputs - Base Game repository
       gameRepositoryAuthor:
@@ -146,7 +147,7 @@ jobs:
       #############################
       #  Add Nightly definition   #
       #############################
-      - if: ${{ inputs.nightly == true }}
+      - if: ${{ inputs.buildType == 'nightly' }}
         name: "[Pre-build] Create a csc.rsp file"
         shell: bash
         run: >
@@ -201,13 +202,18 @@ jobs:
 
 
       #############################
-      # Replace icon with nightly #
+      #       Replace icon        #
       #############################
 
-      - if: ${{ inputs.nightly == true }}
-        name: "[Pre-build] Replace icon with Nightly/Development"
+      - if: ${{ inputs.buildType == 'development' }}
+        name: "[Pre-build] Replace icon with Development"
         shell: bash
         run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
+
+      - if: ${{ inputs.buildType == 'nightly' }}
+        name: "[Pre-build] Replace icon with Nightly"
+        shell: bash
+        run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
 
 
       #############################

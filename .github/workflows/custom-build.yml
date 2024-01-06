@@ -8,10 +8,15 @@ on:
         description: "Version Name"
         type: string
         required: true
-      nightly:
-        description: "Nightly Build"
-        type: boolean
-        default: false
+      buildType:
+        description: 'Build Type'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - stable
+          - nightly
+          - development
 
       # Inputs - Base Game repository
       gameRepositoryAuthor:
@@ -53,7 +58,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ inputs.versionName }}
-      nightly: ${{ inputs.nightly }}
+      buildType: ${{ inputs.buildType }}
       gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
       gameRepositoryName: ${{ inputs.gameRepositoryName }}
       gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}
@@ -68,7 +73,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ inputs.versionName }}
-      nightly: ${{ inputs.nightly }}
+      buildType: ${{ inputs.buildType }}
       gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
       gameRepositoryName: ${{ inputs.gameRepositoryName }}
       gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}
@@ -83,7 +88,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ inputs.versionName }}
-      nightly: ${{ inputs.nightly }}
+      buildType: ${{ inputs.buildType }}
       gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
       gameRepositoryName: ${{ inputs.gameRepositoryName }}
       gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}

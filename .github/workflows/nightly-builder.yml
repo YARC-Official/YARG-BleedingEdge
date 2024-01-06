@@ -25,7 +25,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.latestSHA }}
-      nightly: true
+      buildType: 'nightly'
 
   mac-builder:
     needs: [check]
@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.latestSHA }}
-      nightly: true
+      buildType: 'nightly'
 
   windows-builder:
     needs: [check]
@@ -47,7 +47,7 @@ jobs:
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.latestSHA }}
-      nightly: true
+      buildType: 'nightly'
 
   publish:
     needs: [check, linux-builder, mac-builder, windows-builder]
