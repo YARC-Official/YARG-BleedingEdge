@@ -50,6 +50,7 @@ on:
         default: "master"
         type: string
     
+run-name: 🔨 Custom Build - ${{ inputs.versionName }} by @${{ github.actor }}
 
 jobs:
   linux-builder:
