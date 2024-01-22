@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 
 const latestRelease = await GetLatestRelease(BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME);
 const devCommits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH, latestRelease.published_at);
-const latestDevCommit = devCommits[0];
+const latestDevCommit = devCommits.commits[0];
 const nightlyVersionName = `b${devCommits?.branchCommitCount}`;
 
 function checkReleasePlatformBuild(release, platform = process.env.PLATFORM) {
