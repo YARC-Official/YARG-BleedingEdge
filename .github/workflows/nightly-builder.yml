@@ -24,7 +24,7 @@ jobs:
     uses: ./.github/workflows/build-Linux.yml
     secrets: inherit
     with: 
-      versionName: ${{ needs.check.outputs.latestSHA }}
+      versionName: ${{ needs.check.outputs.tagName }}
       buildType: 'nightly'
 
   mac-builder:
@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/build-Mac.yml
     secrets: inherit
     with: 
-      versionName: ${{ needs.check.outputs.latestSHA }}
+      versionName: ${{ needs.check.outputs.tagName }}
       buildType: 'nightly'
 
   windows-builder:
@@ -46,7 +46,7 @@ jobs:
     uses: ./.github/workflows/build-Windows.yml
     secrets: inherit
     with: 
-      versionName: ${{ needs.check.outputs.latestSHA }}
+      versionName: ${{ needs.check.outputs.tagName }}
       buildType: 'nightly'
 
   publish:
@@ -64,7 +64,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: Nightly Build - ${{ needs.check.outputs.latestSHA }}
+          release_name: Nightly Build - ${{ needs.check.outputs.tagName }}
           tag: ${{ needs.check.outputs.tagName }}
           file: builds/*
           file_glob: true
