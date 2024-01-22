@@ -52,16 +52,19 @@ export async function GetCommits(repositoryAuthor, repositoryName, branch, since
                 ref(qualifiedName:$branch) {
                 target {
                 ... on Commit {
+                    branchCommitCount: history(first: 0) {
+                        totalCount
+                    },
                     history(first: 100, since:$since) {
-                    nodes {
-                        oid,
-                        author {
-                            user {
-                                login
-                            }
-                        },
-                        messageHeadline
-                    }
+                        nodes {
+                            oid,
+                            author {
+                                user {
+                                    login
+                                }
+                            },
+                            messageHeadline
+                        }
                     }
                 }
                 }
@@ -75,7 +78,10 @@ export async function GetCommits(repositoryAuthor, repositoryName, branch, since
         since
     });
 
-    return data.repository.ref.target.history.nodes;
+    return {
+        branchCommitCount: data.repository.ref.target.branchCommitCount.totalCount,
+        commits: data.repository.ref.target.history.nodes
+    };
 }
 
 /**

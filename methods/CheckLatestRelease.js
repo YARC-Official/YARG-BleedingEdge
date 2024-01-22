@@ -3,12 +3,12 @@ import { BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME, YARG_DEVBRA
 import * as core from '@actions/core';
 
 const latestRelease = await GetLatestRelease(BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME);
-const latestDevCommit = await GetLatestCommit(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH);
 const devCommits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH, latestRelease.published_at);
+const latestDevCommit = devCommits.commits[0];
+const nightlyVersionName = `b${devCommits?.branchCommitCount}`;
 
-function FindIfLastestCommitHasBuild(release, platform = process.env.PLATFORM) {
-    const sha = latestDevCommit.sha;
-    const assetName = `YARG_${sha}-${platform}`;
+function checkReleasePlatformBuild(release, platform = process.env.PLATFORM) {
+    const assetName = `YARG_${nightlyVersionName}-${platform}`;
 
     const index = release.assets.findIndex(asset => 
         asset.name
@@ -19,9 +19,9 @@ function FindIfLastestCommitHasBuild(release, platform = process.env.PLATFORM) {
     return index >= 0;
 }
 
-core.setOutput("macBuild", !FindIfLastestCommitHasBuild(latestRelease, "MacOS"));
-core.setOutput("windowsBuild", !FindIfLastestCommitHasBuild(latestRelease, "Windows"));
-core.setOutput("linuxBuild", !FindIfLastestCommitHasBuild(latestRelease, "Linux"));
+core.setOutput("macBuild", !checkReleasePlatformBuild(latestRelease, "MacOS"));
+core.setOutput("windowsBuild", !checkReleasePlatformBuild(latestRelease, "Windows"));
+core.setOutput("linuxBuild", !checkReleasePlatformBuild(latestRelease, "Linux"));
 
 /**
  * Takes all messages from commits and format them to the release message body;
@@ -34,7 +34,7 @@ function formatMessages(devCommits) {
 };
 
 const messageBody = 
-`Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit.sha}
+`Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit?.oid}
 
 
 ### ⚠️ This build is an extremely early beta, so bugs are expected. ⚠️
@@ -45,9 +45,9 @@ Downloads are below.
 
 ## 📋 Commits
 
-${formatMessages(devCommits)}
+${formatMessages(devCommits.commits)}
 `;
 
-core.setOutput("messageBody", devCommits.length > 0 ? messageBody : latestRelease.body);
-core.setOutput("latestSHA", latestDevCommit.sha);
-core.setOutput("tagName", latestDevCommit.sha.substring(0, 7));
+core.setOutput("messageBody", devCommits.commits.length > 0 ? messageBody : latestRelease.body);
+core.setOutput("latestSHA", latestDevCommit?.oid);
+core.setOutput("tagName", nightlyVersionName);
