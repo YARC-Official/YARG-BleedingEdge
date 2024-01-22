@@ -3,8 +3,8 @@ import { BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME, YARG_DEVBRA
 import * as core from '@actions/core';
 
 const latestRelease = await GetLatestRelease(BLEEDINGEDGE_REPOSITORYAUTHOR, BLEEDINGEDGE_REPOSITORYNAME);
-const latestDevCommit = await GetLatestCommit(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH);
 const devCommits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, YARG_DEVBRANCH, latestRelease.published_at);
+const latestDevCommit = devCommits[0];
 const nightlyVersionName = `b${devCommits?.branchCommitCount}`;
 
 function FindIfLastestCommitHasBuild(release, platform = process.env.PLATFORM) {
@@ -34,7 +34,7 @@ function formatMessages(devCommits) {
 };
 
 const messageBody = 
-`Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit.sha}
+`Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit?.oid}
 
 
 ### ⚠️ This build is an extremely early beta, so bugs are expected. ⚠️
@@ -48,6 +48,6 @@ Downloads are below.
 ${formatMessages(devCommits.commits)}
 `;
 
-core.setOutput("messageBody", devCommits.length > 0 ? messageBody : latestRelease.body);
-core.setOutput("latestSHA", latestDevCommit.sha);
+core.setOutput("messageBody", devCommits.commits.length > 0 ? messageBody : latestRelease.body);
+core.setOutput("latestSHA", latestDevCommit?.oid);
 core.setOutput("tagName", nightlyVersionName);
