@@ -7,7 +7,7 @@ const devCommits = await GetCommits(YARG_ORGANIZATIONNAME, YARG_GAMEREPOSITORY, 
 const latestDevCommit = devCommits[0];
 const nightlyVersionName = `b${devCommits?.branchCommitCount}`;
 
-function FindIfLastestCommitHasBuild(release, platform = process.env.PLATFORM) {
+function checkReleasePlatformBuild(release, platform = process.env.PLATFORM) {
     const assetName = `YARG_${nightlyVersionName}-${platform}`;
 
     const index = release.assets.findIndex(asset => 
@@ -19,9 +19,9 @@ function FindIfLastestCommitHasBuild(release, platform = process.env.PLATFORM) {
     return index >= 0;
 }
 
-core.setOutput("macBuild", !FindIfLastestCommitHasBuild(latestRelease, "MacOS"));
-core.setOutput("windowsBuild", !FindIfLastestCommitHasBuild(latestRelease, "Windows"));
-core.setOutput("linuxBuild", !FindIfLastestCommitHasBuild(latestRelease, "Linux"));
+core.setOutput("macBuild", !checkReleasePlatformBuild(latestRelease, "MacOS"));
+core.setOutput("windowsBuild", !checkReleasePlatformBuild(latestRelease, "Windows"));
+core.setOutput("linuxBuild", !checkReleasePlatformBuild(latestRelease, "Linux"));
 
 /**
  * Takes all messages from commits and format them to the release message body;
