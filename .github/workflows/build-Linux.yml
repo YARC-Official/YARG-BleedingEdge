@@ -53,8 +53,8 @@ on:
 env:
   platform: "Linux"
 
-  unityVersion: "2021.3.21f1"
-  unityVersionHash: "1b156197d683"
+  unityVersion: "2021.3.36f1"
+  unityVersionHash: "7a0645017be0"
   blenderMajorVersion: "3.4"
   blenderVersion: "3.4.1"
 
@@ -75,7 +75,6 @@ jobs:
     timeout-minutes: 90
 
     steps:
-
       #############################
       #       Install Unity       #
       #############################
@@ -109,7 +108,6 @@ jobs:
           tar -xvf "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz" -C "${{ runner.temp }}/Unity" &&
           rm -rf "${{ runner.temp }}/UnityInstall"
 
-
       #############################
       #          Checkout         #
       #############################
@@ -138,7 +136,6 @@ jobs:
           repository: ${{ github.repository }}
           path: bleedingedge
 
-
       #############################
       #           Cache           #
       #############################
@@ -148,7 +145,6 @@ jobs:
         with:
           path: Library
           key: ${{ env.platform }}-YARG_Library
-
 
       #############################
       #  Add Nightly definition   #
@@ -167,7 +163,7 @@ jobs:
       - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
         id: blender
         uses: actions/cache@v3
-        with: 
+        with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Linux_Blender-${{ env.blenderVersion }}
           restore-keys: Linux_Blender-
@@ -183,7 +179,6 @@ jobs:
           sudo mv /opt/blender*/ /opt/blender &&
           sudo ln -sf /opt/blender/blender /usr/bin/blender
 
-
       #############################
       #     Restore  Packages     #
       #############################
@@ -191,11 +186,10 @@ jobs:
       - name: "[Pre-install] Install dotnet 8.x"
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
       - name: "[Pre-install] Restoring NuGet Packages"
         run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
-
 
       #############################
       #       Replace icon        #
@@ -209,7 +203,6 @@ jobs:
         name: "[Pre-build] Replace icon with Nightly"
         run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
 
-
       #############################
       #      Build YARG.Core      #
       #############################
@@ -218,7 +211,6 @@ jobs:
         run: >
           mkdir Assets/Plugins/YARG.Core &&
           dotnet build YARG.Core/YARG.Core/YARG.Core.csproj /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary --output Assets/Plugins/YARG.Core
-
 
       #############################
       #           Build           #
@@ -235,13 +227,11 @@ jobs:
         continue-on-error: true
         run: ${{ runner.temp }}/Unity/Editor/Unity -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.LINUX_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.LINUX_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile -
 
-
       #############################
       #         Compress          #
       #############################
       - name: "[Post-build] Compress to a .zip"
         run: mkdir Release && (cd build && zip -r ../Release/YARG_${{ env.versionName }}-Linux-x64.zip .)
-
 
       #############################
       #          Upload           #
@@ -253,5 +243,5 @@ jobs:
           name: YARG (${{ env.versionName }}) - ${{ env.platform }}
           path: Release/*
 
-    outputs: 
+    outputs:
       artifactId: ${{ steps.artifacts.outputs.artifact-id }}

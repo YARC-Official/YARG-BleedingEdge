@@ -53,8 +53,8 @@ on:
 env:
   platform: "Windows"
 
-  unityVersion: "2021.3.21f1"
-  unityVersionHash: "1b156197d683"
+  unityVersion: "2021.3.36f1"
+  unityVersionHash: "7a0645017be0"
   blenderMajorVersion: "3.5"
   blenderVersion: "3.5.1"
 
@@ -75,7 +75,6 @@ jobs:
     timeout-minutes: 90
 
     steps:
-
       #############################
       #       Install Unity       #
       #############################
@@ -83,7 +82,7 @@ jobs:
       - name: "[Install] Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
         id: unity-install
         uses: actions/cache@v3.2.2
-        with: 
+        with:
           path: ${{ runner.temp }}/Unity
           key: Windows_Unity-${{ env.unityVersion }}
 
@@ -102,7 +101,6 @@ jobs:
           Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
           Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
           Remove-Item -Recurse -Force -Path ${{ runner.temp }}\UnityInstall\*;
-
 
       #############################
       #          Checkout         #
@@ -132,7 +130,6 @@ jobs:
           repository: ${{ github.repository }}
           path: bleedingedge
 
-
       #############################
       #           Cache           #
       #############################
@@ -142,7 +139,6 @@ jobs:
         with:
           path: Library
           key: ${{ env.platform }}-YARG_Library
-
 
       #############################
       #  Add Nightly definition   #
@@ -161,7 +157,7 @@ jobs:
       - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
         id: blender
         uses: actions/cache@v3
-        with: 
+        with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Windows_Blender-${{ env.blenderVersion }}
           restore-keys: Windows_Blender-
@@ -177,7 +173,6 @@ jobs:
           $BLENDERARGS = "/I $BLENDERMSI ALLUSERS=1 /qn /norestart";
           Start-Process "msiexec.exe" -ArgumentList $BLENDERARGS -wait -nonewwindow
 
-
       #############################
       #     Restore  Packages     #
       #############################
@@ -185,11 +180,10 @@ jobs:
       - name: "[Pre-install] Install dotnet 8.x"
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
       - name: "[Pre-install] Restoring NuGet Packages"
         run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
-
 
       #############################
       #      Build YARG.Core      #
@@ -199,7 +193,6 @@ jobs:
         run: >
           mkdir Assets/Plugins/YARG.Core;
           dotnet build YARG.Core/YARG.Core/YARG.Core.csproj /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary --output Assets/Plugins/YARG.Core;
-
 
       #############################
       #       Replace icon        #
@@ -215,7 +208,6 @@ jobs:
         shell: bash
         run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
 
-
       #############################
       #           Build           #
       #############################
@@ -230,7 +222,6 @@ jobs:
         continue-on-error: true
         run: ${{ runner.temp }}/Unity/Editor/Unity.exe -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.WINDOWS_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.WINDOWS_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile | Out-Host;
 
-
       #############################
       #         Compress          #
       #############################
@@ -239,7 +230,6 @@ jobs:
         run: >
           mkdir Release;
           Compress-Archive -Path ${{ github.workspace }}/build/* -DestinationPath ${{ github.workspace }}/Release/YARG_${{ env.versionName }}-Windows-x64.zip;
-
 
       #############################
       #          Upload           #
@@ -251,5 +241,5 @@ jobs:
           name: YARG (${{ env.versionName }}) - ${{ env.platform }}
           path: Release/*
 
-    outputs: 
+    outputs:
       artifactId: ${{ steps.artifacts.outputs.artifact-id }}
