@@ -91,14 +91,14 @@ jobs:
 
       - if: ${{ inputs.customCoreRepository == true }}
         name: "[Pre-install] Pull YARG.Core"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
           ref: ${{ env.coreRepositoryBranch }}
           path: YARG.Core
 
       - name: "[Pre-install] Pull bleeding-edge repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           path: bleedingedge
@@ -108,7 +108,7 @@ jobs:
       #############################
 
       - name: "[Pre-install] Restore 'library' cache"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: Library
           key: ${{ env.platform }}-YARG_Library
@@ -129,7 +129,7 @@ jobs:
 
       - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
         id: blender
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Mac_Blender-${{ env.blenderVersion }}

@@ -1,4 +1,4 @@
-name: 📦 Cache Unity for Windows
+name: 📦 Cache Unity 2021.3.36f1 for Windows
 
 on:
   workflow_dispatch:
@@ -7,18 +7,16 @@ env:
   unityVersion: "2021.3.36f1"
   unityVersionHash: "7a0645017be0"
 
-run-name: 📦 Cache Unity ${{ env.unityVersion }} for Windows
-
 jobs:
   cacheUnity:
-    name: Cache Unity ${{ env.unityVersion }} for Windows
+    name: 📦 Cache Unity 2021.3.36f1 for Windows
     runs-on: windows-2019
     timeout-minutes: 90
 
     steps:
       - name: "Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
         id: unity-install
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/Unity
           key: Windows_Unity-${{ env.unityVersion }}
