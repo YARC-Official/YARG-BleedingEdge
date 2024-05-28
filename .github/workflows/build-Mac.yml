@@ -114,14 +114,21 @@ jobs:
           key: ${{ env.platform }}-YARG_Library
 
       #############################
-      #  Add Nightly definition   #
+      # Add build flag definition #
       #############################
       - if: ${{ inputs.buildType == 'nightly' }}
-        name: "[Pre-build] Create a csc.rsp file"
+        name: "[Pre-build] Create a csc.rsp file (nightly)"
         shell: bash
         run: >
           touch Assets/csc.rsp &&
           echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
+
+      - if: ${{ inputs.buildType == 'development' }}
+        name: "[Pre-build] Create a csc.rsp file (development)"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
 
       #############################
       #      Install Blender      #
