@@ -81,7 +81,7 @@ jobs:
 
       - name: "[Install] Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
         id: unity-install
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/Unity
           key: Windows_Unity-${{ env.unityVersion }}
@@ -118,14 +118,14 @@ jobs:
 
       - if: ${{ inputs.customCoreRepository == true }}
         name: "[Pre-install] Pull YARG.Core"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
           ref: ${{ env.coreRepositoryBranch }}
           path: YARG.Core
 
       - name: "[Pre-install] Pull bleeding-edge repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           path: bleedingedge
@@ -135,7 +135,7 @@ jobs:
       #############################
 
       - name: "[Pre-install] Restore 'library' cache"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: Library
           key: ${{ env.platform }}-YARG_Library
@@ -156,7 +156,7 @@ jobs:
 
       - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
         id: blender
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Windows_Blender-${{ env.blenderVersion }}
