@@ -85,6 +85,7 @@ jobs:
           repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
           ref: ${{ env.gameRepositoryBranch }}
           submodules: recursive
+          fetch-depth: 0
 
       - name: "[Pre-install] Pull latest submodules"
         run: git submodule update
