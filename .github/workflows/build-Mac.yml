@@ -216,7 +216,7 @@ jobs:
       #############################
 
       - name: "[Post-build] Compress to a .zip"
-        run: ditto -c -k --keepParent build/YARG.app Release/YARG_${{ env.versionName }}-MacOS-Universal.zip
+        run: ditto -c -k --keepParent build/YARG.app "Release/YARG_${{ env.versionName }}-MacOS-Universal.zip"
 
       #############################
       #          Upload           #
