@@ -71,7 +71,7 @@ env:
 jobs:
   linuxBuilder:
     name: 🔨 Build - Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 90
 
     steps:
