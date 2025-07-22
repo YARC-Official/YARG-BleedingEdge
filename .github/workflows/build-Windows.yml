@@ -79,23 +79,14 @@ jobs:
       #       Install Unity       #
       #############################
 
-      - name: "[Install] Get Unity Editor + Windows IL2CPP builder (${{ env.unityVersion }}) pre-installed from cache"
-        id: unity-install
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/Unity
-          key: Windows_Unity-${{ env.unityVersion }}
-
-      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
-        name: "[Install] Download Unity Editor + Windows IL2CPP builder"
+      - name: "[Install] Download Unity Editor + Windows IL2CPP builder"
         continue-on-error: true
         run: >
           mkdir ${{ runner.temp }}\UnityInstall;
           curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/Windows64EditorInstaller/UnitySetup64-${{ env.unityVersion }}.exe;
           curl -L -o "${{ runner.temp }}\UnityInstall\UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/TargetSupportInstaller/UnitySetup-Windows-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.exe;
 
-      - if: ${{ steps.unity-install.outputs.cache-hit != 'true' }}
-        name: "[Install] Install Unity"
+      - name: "[Install] Install Unity"
         run: >
           $UNITY_INSTALLARGUMENTS = "/S /D=${{ runner.temp }}\\Unity";
           Start-Process "${{ runner.temp }}\UnityInstall\UnitySetup64-${{ env.unityVersion }}.exe" -ArgumentList $UNITY_INSTALLARGUMENTS -wait -nonewwindow;
