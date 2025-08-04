@@ -212,15 +212,6 @@ jobs:
         run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
 
       #############################
-      #      Build YARG.Core      #
-      #############################
-
-      - name: "[Pre-build] Build YARG.Core"
-        run: >
-          mkdir Assets/Plugins/YARG.Core &&
-          dotnet build YARG.Core/YARG.Core/YARG.Core.csproj /property:GenerateFullPaths=true /consoleloggerparameters:NoSummary --output Assets/Plugins/YARG.Core
-
-      #############################
       #           Build           #
       #############################
 
