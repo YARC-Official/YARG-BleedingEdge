@@ -1,0 +1,224 @@
+name: 🔨 Build - Mac
+
+on:
+  workflow_call:
+    inputs:
+      versionName:
+        description: "Version Name"
+        type: string
+        required: true
+      buildType:
+        description: "Build Type"
+        type: string
+        required: true
+        default: "development"
+
+      # Inputs - Base Game repository
+      gameRepositoryAuthor:
+        description: "Base Game - Repository Author"
+        default: "YARC-Official"
+        type: string
+      gameRepositoryName:
+        description: "Base Game - Repository Name"
+        default: "YARG"
+        type: string
+      gameRepositoryBranch:
+        description: "Base Game - Repository Branch"
+        default: "dev"
+        type: string
+
+      # Inputs - YARG.Core repository
+      customCoreRepository:
+        description: "Using custom YARG.Core repository/branch"
+        type: boolean
+        default: false
+      coreRepositoryAuthor:
+        description: "YARG.Core - Repository Author"
+        default: "YARC-Official"
+        type: string
+      coreRepositoryName:
+        description: "YARG.Core - Repository Name"
+        default: "YARG.Core"
+        type: string
+      coreRepositoryBranch:
+        description: "YARG.Core - Repository Branch"
+        default: "master"
+        type: string
+
+    outputs:
+      artifactId:
+        description: "Artifact ID"
+        value: ${{ jobs.macBuilder.outputs.artifactId }}
+
+env:
+  platform: "MacOS"
+
+  unityVersion: "2021.3.36f1"
+  unityVersionHash: "7a0645017be0"
+  blenderMajorVersion: "4.3"
+  blenderVersion: "4.3.0"
+
+  versionName: ${{ inputs.versionName }}
+
+  gameRepositoryAuthor: ${{ inputs.gameRepositoryAuthor }}
+  gameRepositoryName: ${{ inputs.gameRepositoryName }}
+  gameRepositoryBranch: ${{ inputs.gameRepositoryBranch }}
+
+  coreRepositoryAuthor: ${{ inputs.coreRepositoryAuthor }}
+  coreRepositoryName: ${{ inputs.coreRepositoryName }}
+  coreRepositoryBranch: ${{ inputs.coreRepositoryBranch }}
+
+jobs:
+  macBuilder:
+    name: 🔨 Build - MacOS
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    steps:
+      #############################
+      #          Checkout         #
+      #############################
+
+      - name: "[Pre-install] Pull project"
+        uses: nschloe/action-cached-lfs-checkout@v1.2.1
+        with:
+          repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
+          ref: ${{ env.gameRepositoryBranch }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: "[Pre-install] Pull latest submodules"
+        run: git submodule update
+
+      - if: ${{ inputs.customCoreRepository == true }}
+        name: "[Pre-install] Pull YARG.Core"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
+          ref: ${{ env.coreRepositoryBranch }}
+          path: YARG.Core
+
+      - name: "[Pre-install] Pull bleeding-edge repository"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          path: bleedingedge
+
+      #############################
+      #           Cache           #
+      #############################
+
+      - name: "[Pre-install] Restore 'library' cache"
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: ${{ env.platform }}-YARG_Library
+
+      #############################
+      # Add build flag definition #
+      #############################
+      - if: ${{ inputs.buildType == 'nightly' }}
+        name: "[Pre-build] Create a csc.rsp file (nightly)"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
+
+      - if: ${{ inputs.buildType == 'development' }}
+        name: "[Pre-build] Create a csc.rsp file (development)"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+
+      #############################
+      #      Install Blender      #
+      #############################
+
+      - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
+        id: blender
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/BlenderInstall
+          key: Mac_Blender-${{ env.blenderVersion }}
+          restore-keys: Mac_Blender-
+
+      - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
+        name: "[Pre-install] Download Blender (${{ env.blenderVersion }})"
+        continue-on-error: true
+        run: mkdir ${{ runner.temp }}/BlenderInstall && curl -L -o "${{ runner.temp }}/BlenderInstall/blender.dmg" https://download.blender.org/release/Blender${{ env.blenderMajorVersion }}/blender-${{ env.blenderVersion }}-macos-x64.dmg
+
+      - name: "[Pre-install] Install Blender (${{ env.blenderVersion }})"
+        run: >
+          hdiutil attach ${{ runner.temp }}/BlenderInstall/blender.dmg && 
+          cp -R /Volumes/Blender/Blender.app /Applications && 
+          hdiutil unmount /Volumes/Blender
+
+      #############################
+      #     Restore  Packages     #
+      #############################
+
+      - name: "[Pre-install] Install dotnet 8.x"
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: "[Pre-install] Restoring NuGet Packages"
+        run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
+
+      #############################
+      #       Replace icon        #
+      #############################
+
+      - if: ${{ inputs.buildType == 'development' }}
+        name: "[Pre-build] Replace icon with Development"
+        run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
+
+      - if: ${{ inputs.buildType == 'nightly' }}
+        name: "[Pre-build] Replace icon with Nightly"
+        run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
+
+      #############################
+      #           Build           #
+      #############################
+
+      - name: "[Install] Download Unity Editor + Mac IL2CPP builder"
+        run: |
+          mkdir ${{ runner.temp }}/UnityInstall &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg &&
+          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg
+
+      - name: "[Install] Install Unity Editor + Mac IL2CPP builder"
+        run: |
+          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" -target "/" -verbose &&
+          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" -target "/" -verbose &&
+          rm -rf "${{ runner.temp }}/UnityInstall"
+
+      - name: "[Build] Run Builder"
+        run: |
+          /Applications/Unity/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneOSX -buildOSXUniversalPlayer ${{ github.workspace }}/build/YARG.app -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.MAC_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
+
+      - name: "[Post-build] Return license"
+        continue-on-error: true
+        run: /Applications/Unity/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile -
+
+      #############################
+      #         Compress          #
+      #############################
+
+      - name: "[Post-build] Compress to a .zip"
+        run: ditto -c -k --keepParent build/YARG.app "Release/YARG_${{ env.versionName }}-MacOS-Universal.zip"
+
+      #############################
+      #          Upload           #
+      #############################
+
+      - name: "[Post-build] Upload to artifacts"
+        id: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: YARG (${{ env.versionName }}) - ${{ env.platform }}
+          path: Release/*
+
+    outputs:
+      artifactId: ${{ steps.artifacts.outputs.artifact-id }}
