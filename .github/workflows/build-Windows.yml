@@ -55,8 +55,8 @@ env:
 
   unityVersion: "2021.3.36f1"
   unityVersionHash: "7a0645017be0"
-  blenderMajorVersion: "3.5"
-  blenderVersion: "3.5.1"
+  blenderMajorVersion: "4.3"
+  blenderVersion: "4.3.0"
 
   versionName: ${{ inputs.versionName }}
 
@@ -159,7 +159,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Windows_Blender-${{ env.blenderVersion }}
-          restore-keys: Windows_Blender-
+          # restore-keys: Windows_Blender-
 
       - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
         name: "[Pre-install] Download Blender (${{ env.blenderVersion }})"
