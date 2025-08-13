@@ -1,4 +1,4 @@
-name: 🔨 Custom Build
+name: 🔨 Custom Build (Blender 4.3)
 
 on: 
   workflow_dispatch:
