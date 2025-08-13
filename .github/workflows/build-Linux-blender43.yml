@@ -174,7 +174,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/BlenderInstall
           key: Linux_Blender-${{ env.blenderVersion }}
-          restore-keys: Linux_Blender-
+          restore-keys: Linux_Blender-${{ env.blenderVersion }}
 
       - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
         name: "[Pre-install] Download Blender (${{ env.blenderVersion }})"
