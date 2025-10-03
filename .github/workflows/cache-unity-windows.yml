@@ -1,15 +1,15 @@
-name: 📦 Cache Unity 2021.3.36f1 for Windows
+name: 📦 Cache Unity 2021.3.45f2 for Windows
 
 on:
   workflow_dispatch:
 
 env:
-  unityVersion: "2021.3.36f1"
-  unityVersionHash: "7a0645017be0"
+  unityVersion: ${{ vars.UNITY_VERSION }}
+  unityVersionHash: ${{ vars.UNITY_VERSION_HASH }}
 
 jobs:
   cacheUnity:
-    name: 📦 Cache Unity 2021.3.36f1 for Windows
+    name: 📦 Cache Unity 2021.3.45f2 for Windows
     runs-on: windows-2019
     timeout-minutes: 90
 

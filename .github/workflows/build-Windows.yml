@@ -53,8 +53,8 @@ on:
 env:
   platform: "Windows"
 
-  unityVersion: "2021.3.36f1"
-  unityVersionHash: "7a0645017be0"
+  unityVersion: ${{ vars.UNITY_VERSION }}
+  unityVersionHash: ${{ vars.UNITY_VERSION_HASH }}
   blenderMajorVersion: "4.3"
   blenderVersion: "4.3.0"
 
