@@ -1,4 +1,4 @@
-name: 🔨 Build - Linux
+name: 🔨 Build - Linux (Unity 6)
 
 on:
   workflow_call:

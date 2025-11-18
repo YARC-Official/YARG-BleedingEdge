@@ -1,4 +1,4 @@
-name: 🔨 Build - Windows
+name: 🔨 Build - Windows (Unity 6)
 
 on:
   workflow_call:

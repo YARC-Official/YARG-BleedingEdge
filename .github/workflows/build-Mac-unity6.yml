@@ -1,4 +1,4 @@
-name: 🔨 Build - Mac
+name: 🔨 Build - Mac (Unity 6)
 
 on:
   workflow_call:
