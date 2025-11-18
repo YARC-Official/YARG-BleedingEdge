@@ -55,7 +55,7 @@ run-name: 🔨 Custom Build - ${{ inputs.versionName }} by @${{ github.actor }}
 jobs:
   linux-builder:
     name: "🔨 Build - Linux"
-    uses: ./.github/workflows/unity-6/build-Linux.yml
+    uses: ./.github/workflows/build-Linux-unity6.yml
     secrets: inherit
     with:
       versionName: ${{ inputs.versionName }}
@@ -70,7 +70,7 @@ jobs:
 
   mac-builder:
     name: "🔨 Build - MacOS"
-    uses: ./.github/workflows/unity-6/build-Mac.yml
+    uses: ./.github/workflows/build-Mac-unity6.yml
     secrets: inherit
     with:
       versionName: ${{ inputs.versionName }}
@@ -85,7 +85,7 @@ jobs:
 
   windows-builder:
     name: "🔨 Build - Windows"
-    uses: ./.github/workflows/unity-6/build-Windows.yml
+    uses: ./.github/workflows/build-Windows-unity6.yml
     secrets: inherit
     with:
       versionName: ${{ inputs.versionName }}
