@@ -196,11 +196,11 @@ jobs:
 
       - name: "[Build] Run Builder"
         run: |
-          /Applications/Unity/${{ env.unityVersion }}/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneOSX -buildOSXUniversalPlayer ${{ github.workspace }}/build/YARG.app -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.MAC_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
+          /Applications/Unity/Unity-${{ env.unityVersion }}/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -projectPath ${{ github.workspace }} -buildTarget StandaloneOSX -buildOSXUniversalPlayer ${{ github.workspace }}/build/YARG.app -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -serial ${{ secrets.MAC_UNITY_SERIAL || secrets.UNITY_SERIAL }} -logfile -
 
       - name: "[Post-build] Return license"
         continue-on-error: true
-        run: /Applications/Unity/${{ env.unityVersion }}/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile -
+        run: /Applications/Unity/Unity-${{ env.unityVersion }}/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -returnlicense -projectPath ${{ github.workspace }} -username ${{ secrets.MAC_UNITY_EMAIL || secrets.UNITY_EMAIL }} -password ${{ secrets.MAC_UNITY_PASSWORD || secrets.UNITY_PASSWORD }} -logfile -
 
       #############################
       #         Compress          #
