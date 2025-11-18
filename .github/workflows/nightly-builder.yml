@@ -21,7 +21,7 @@ jobs:
     if: needs.check.outputs.linuxBuild == 'true'
     
     name: "🔨 Build - Linux"
-    uses: ./.github/workflows/build-Linux.yml
+    uses: ./.github/workflows/build-Linux-unity6.yml
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.tagName }}
@@ -32,7 +32,7 @@ jobs:
     if: needs.check.outputs.macBuild == 'true'
 
     name: "🔨 Build - MacOS"
-    uses: ./.github/workflows/build-Mac.yml
+    uses: ./.github/workflows/build-Mac-unity6.yml
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.tagName }}
@@ -43,7 +43,7 @@ jobs:
     if: needs.check.outputs.windowsBuild == 'true'
 
     name: "🔨 Build - Windows"
-    uses: ./.github/workflows/build-Windows.yml
+    uses: ./.github/workflows/build-Windows-unity6.yml
     secrets: inherit
     with: 
       versionName: ${{ needs.check.outputs.tagName }}
