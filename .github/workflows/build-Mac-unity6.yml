@@ -80,11 +80,8 @@ jobs:
       #############################
 
       - name: "[Pre-install] Pull project"
-        # Github broke the cached action on macos, so we're temporarily using regular checkout here
-        #uses: nschloe/action-cached-lfs-checkout@v1.2.1
-        uses: actions/checkout@v4
+        uses: nschloe/action-cached-lfs-checkout@v1.2.1
         with:
-          lfs: true
           repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
           ref: ${{ env.gameRepositoryBranch }}
           submodules: recursive
