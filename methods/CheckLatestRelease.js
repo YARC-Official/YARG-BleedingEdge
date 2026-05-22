@@ -10,7 +10,7 @@ const nightlyVersionName = `b${devCommits?.branchCommitCount}`;
 function checkReleasePlatformBuild(release, platform = process.env.PLATFORM) {
     const assetName = `YARG_${nightlyVersionName}-${platform}`;
 
-    const index = release.assets.findIndex(asset => 
+    const index = release.assets.findIndex(asset =>
         asset.name
         .toLowerCase()
         .startsWith(assetName.toLowerCase())
@@ -25,15 +25,20 @@ core.setOutput("linuxBuild", !checkReleasePlatformBuild(latestRelease, "Linux"))
 
 /**
  * Takes all messages from commits and format them to the release message body;
- * @param {Object[]} devCommits 
+ * @param {Object[]} devCommits
  */
 function formatMessages(devCommits) {
     return devCommits
-    .map(commit => `\n* ${commit.messageHeadline} (@${commit.author.user.login})\n`)
+      .map((commit) => {
+        const login = commit.author?.user?.login;
+        const name = commit.author?.name;
+
+        return `\n* ${commit.messageHeadline} (${login ? `@${login}` : name ? name : "unknown author"})\n`;
+      })
     .join("");
 };
 
-const messageBody = 
+const messageBody =
 `Built using the commit https://github.com/${YARG_ORGANIZATIONNAME}/${YARG_GAMEREPOSITORY}/commit/${latestDevCommit?.oid}
 
 

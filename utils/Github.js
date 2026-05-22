@@ -2,8 +2,8 @@ import { graphql } from "@octokit/graphql";
 import { GITHUB_API_ROOT } from "./const.js";
 
 /**
- * @param {string} query 
- * @param {Object} variables 
+ * @param {string} query
+ * @param {Object} variables
  */
 export async function GithubGraphQL(query, variables) {
     const data = await graphql(query, {
@@ -17,7 +17,7 @@ export async function GithubGraphQL(query, variables) {
 }
 
 /**
- * @param {string} path 
+ * @param {string} path
  */
 export async function GithubRESTAPI(path) {
     return fetch(GITHUB_API_ROOT + path, {
@@ -28,8 +28,8 @@ export async function GithubRESTAPI(path) {
 }
 
 /**
- * @param {string} repositoryAuthor 
- * @param {string} repositoryName 
+ * @param {string} repositoryAuthor
+ * @param {string} repositoryName
  */
 export async function GetLatestRelease(repositoryAuthor, repositoryName) {
     const data = await GithubRESTAPI(`repos/${repositoryAuthor}/${repositoryName}/releases/latest`);
@@ -38,12 +38,12 @@ export async function GetLatestRelease(repositoryAuthor, repositoryName) {
 }
 
 /**
- * 
- * @param {string} repositoryAuthor 
- * @param {string} repositoryName 
- * @param {string} branch 
- * @param {string} since 
- * @returns 
+ *
+ * @param {string} repositoryAuthor
+ * @param {string} repositoryName
+ * @param {string} branch
+ * @param {string} since
+ * @returns
  */
 export async function GetCommits(repositoryAuthor, repositoryName, branch, since) {
     const data = await GithubGraphQL(`
@@ -59,6 +59,7 @@ export async function GetCommits(repositoryAuthor, repositoryName, branch, since
                         nodes {
                             oid,
                             author {
+                                name,
                                 user {
                                     login
                                 }
@@ -85,9 +86,9 @@ export async function GetCommits(repositoryAuthor, repositoryName, branch, since
 }
 
 /**
- * @param {string} repositoryAuthor 
- * @param {string} repositoryName 
- * @param {string} branch 
+ * @param {string} repositoryAuthor
+ * @param {string} repositoryName
+ * @param {string} branch
  */
 export async function GetLatestCommit(repositoryAuthor, repositoryName, branch = "main") {
     const data = await GithubRESTAPI(`repos/${repositoryAuthor}/${repositoryName}/commits/${branch}`);
