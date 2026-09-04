@@ -75,6 +75,15 @@ jobs:
     timeout-minutes: 90
 
     steps:
+      # Not on parallel as this is an composite action
+      - name: "[Pre-install] Pull project"
+        uses: nschloe/action-cached-lfs-checkout@v1.2.1
+        with:
+          repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
+          ref: ${{ env.gameRepositoryBranch }}
+          submodules: recursive
+          fetch-depth: 0
+
       - parallel:
           #############################
           #   Download and checkout   #
@@ -101,14 +110,6 @@ jobs:
               mkdir ${{ runner.temp }}/UnityInstall &&
               curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorInstaller/Unity-${{ env.unityVersion }}.tar.xz &&
               curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorTargetInstaller/UnitySetup-Linux-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.tar.xz
-
-          - name: "[Pre-install] Pull project"
-            uses: nschloe/action-cached-lfs-checkout@v1.2.1
-            with:
-              repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
-              ref: ${{ env.gameRepositoryBranch }}
-              submodules: recursive
-              fetch-depth: 0
 
           - if: ${{ inputs.customCoreRepository == true }}
             name: "[Pre-install] Pull YARG.Core"
