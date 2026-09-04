@@ -108,8 +108,7 @@ jobs:
           - name: "[Pre-install] Download Unity Editor + Linux IL2CPP builder"
             run: |
               mkdir ${{ runner.temp }}/UnityInstall &&
-              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorInstaller/Unity-${{ env.unityVersion }}.tar.xz &&
-              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorTargetInstaller/UnitySetup-Linux-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.tar.xz
+              curl -L --parallel https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorInstaller/Unity-${{ env.unityVersion }}.tar.xz -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.tar.xz" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/LinuxEditorTargetInstaller/UnitySetup-Linux-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.tar.xz -o "${{ runner.temp }}/UnityInstall/UnitySetup-Linux-IL2CPP-Support.tar.xz"
 
           - if: ${{ inputs.customCoreRepository == true }}
             name: "[Pre-install] Pull YARG.Core"

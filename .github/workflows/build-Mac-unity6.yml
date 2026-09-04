@@ -112,8 +112,7 @@ jobs:
           - name: "[Pre-install] Download Unity Editor + Mac IL2CPP builder"
             run: |
               mkdir ${{ runner.temp }}/UnityInstall &&
-              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg &&
-              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg
+              curl -L --parallel https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg"
 
           - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
             id: blender
