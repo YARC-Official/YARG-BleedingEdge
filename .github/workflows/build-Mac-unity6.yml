@@ -75,124 +75,119 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      #############################
-      #          Checkout         #
-      #############################
+      - parallel:
+          #############################
+          #   Download and checkout   #
+          #############################
 
-      - name: "[Pre-install] Pull project"
-        uses: nschloe/action-cached-lfs-checkout@v1.2.1
-        with:
-          repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
-          ref: ${{ env.gameRepositoryBranch }}
-          submodules: recursive
-          fetch-depth: 0
+          - name: "[Pre-install] Pull project"
+            uses: nschloe/action-cached-lfs-checkout@v1.2.1
+            with:
+              repository: ${{ env.gameRepositoryAuthor }}/${{ env.gameRepositoryName }}
+              ref: ${{ env.gameRepositoryBranch }}
+              submodules: recursive
+              fetch-depth: 0
+
+          - if: ${{ inputs.customCoreRepository == true }}
+            name: "[Pre-install] Pull YARG.Core"
+            uses: actions/checkout@v4
+            with:
+              repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
+              ref: ${{ env.coreRepositoryBranch }}
+              path: YARG.Core
+
+          - name: "[Pre-install] Pull bleeding-edge repository"
+            uses: actions/checkout@v4
+            with:
+              repository: ${{ github.repository }}
+              path: bleedingedge
+
+          - name: "[Pre-install] Restore 'library' cache"
+            uses: actions/cache@v4
+            with:
+              path: Library
+              key: ${{ env.platform }}-YARG_Library
+
+          - name: "[Pre-install] Download Unity Editor + Mac IL2CPP builder"
+            run: |
+              mkdir ${{ runner.temp }}/UnityInstall &&
+              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg &&
+              curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg
+
+          - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
+            id: blender
+            uses: actions/cache@v4
+            with:
+              path: ${{ runner.temp }}/BlenderInstall
+              key: Mac_Blender-${{ env.blenderVersion }}
+              # restore-keys: Mac_Blender-
+
+          - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
+            name: "[Pre-install] Download Blender (${{ env.blenderVersion }})"
+            continue-on-error: true
+            run: mkdir ${{ runner.temp }}/BlenderInstall && curl -L -o "${{ runner.temp }}/BlenderInstall/blender.dmg" https://download.blender.org/release/Blender${{ env.blenderMajorVersion }}/blender-${{ env.blenderVersion }}-macos-x64.dmg
+
+          - name: "[Pre-install] Install dotnet 8.x"
+            uses: actions/setup-dotnet@v4
+            with:
+              dotnet-version: "8.0.x"
+
+          #############################
+          #       Replace icon        #
+          #############################
+
+          - if: ${{ inputs.buildType == 'development' }}
+            name: "[Pre-build] Replace icon with Development"
+            run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
+
+          - if: ${{ inputs.buildType == 'nightly' }}
+            name: "[Pre-build] Replace icon with Nightly"
+            run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
+
+            #############################
+            # Add build flag definition #
+            #############################
+
+          - if: ${{ inputs.buildType == 'nightly' }}
+            name: "[Pre-build] Create a csc.rsp file (nightly)"
+            shell: bash
+            run: >
+              touch Assets/csc.rsp &&
+              echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
+
+          - if: ${{ inputs.buildType == 'development' }}
+            name: "[Pre-build] Create a csc.rsp file (development)"
+            shell: bash
+            run: >
+              touch Assets/csc.rsp &&
+              echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+
+      #############################
+      #       Install Tools       #
+      #############################
 
       - name: "[Pre-install] Pull latest submodules"
         run: git submodule update
 
-      - if: ${{ inputs.customCoreRepository == true }}
-        name: "[Pre-install] Pull YARG.Core"
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.coreRepositoryAuthor }}/${{ env.coreRepositoryName }}
-          ref: ${{ env.coreRepositoryBranch }}
-          path: YARG.Core
+      - parallel:
+          - name: "[Install] Install Unity Editor + Mac IL2CPP builder"
+            run: |
+              sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" -target "/" -verbose &&
+              sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" -target "/" -verbose &&
+              rm -rf "${{ runner.temp }}/UnityInstall"
 
-      - name: "[Pre-install] Pull bleeding-edge repository"
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}
-          path: bleedingedge
+          - name: "[Install] Install Blender (${{ env.blenderVersion }})"
+            run: >
+              hdiutil attach ${{ runner.temp }}/BlenderInstall/blender.dmg &&
+              cp -R /Volumes/Blender/Blender.app /Applications &&
+              hdiutil unmount /Volumes/Blender
 
-      #############################
-      #           Cache           #
-      #############################
-
-      - name: "[Pre-install] Restore 'library' cache"
-        uses: actions/cache@v4
-        with:
-          path: Library
-          key: ${{ env.platform }}-YARG_Library
-
-      #############################
-      # Add build flag definition #
-      #############################
-      - if: ${{ inputs.buildType == 'nightly' }}
-        name: "[Pre-build] Create a csc.rsp file (nightly)"
-        shell: bash
-        run: >
-          touch Assets/csc.rsp &&
-          echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
-
-      - if: ${{ inputs.buildType == 'development' }}
-        name: "[Pre-build] Create a csc.rsp file (development)"
-        shell: bash
-        run: >
-          touch Assets/csc.rsp &&
-          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
-
-      #############################
-      #      Install Blender      #
-      #############################
-
-      - name: "[Pre-install] Get Blender (${{ env.blenderVersion }}) from cache"
-        id: blender
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/BlenderInstall
-          key: Mac_Blender-${{ env.blenderVersion }}
-          # restore-keys: Mac_Blender-
-
-      - if: ${{ steps.blender.outputs.cache-hit != 'true' }}
-        name: "[Pre-install] Download Blender (${{ env.blenderVersion }})"
-        continue-on-error: true
-        run: mkdir ${{ runner.temp }}/BlenderInstall && curl -L -o "${{ runner.temp }}/BlenderInstall/blender.dmg" https://download.blender.org/release/Blender${{ env.blenderMajorVersion }}/blender-${{ env.blenderVersion }}-macos-x64.dmg
-
-      - name: "[Pre-install] Install Blender (${{ env.blenderVersion }})"
-        run: >
-          hdiutil attach ${{ runner.temp }}/BlenderInstall/blender.dmg && 
-          cp -R /Volumes/Blender/Blender.app /Applications && 
-          hdiutil unmount /Volumes/Blender
-
-      #############################
-      #     Restore  Packages     #
-      #############################
-
-      - name: "[Pre-install] Install dotnet 8.x"
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
-
-      - name: "[Pre-install] Restoring NuGet Packages"
-        run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
-
-      #############################
-      #       Replace icon        #
-      #############################
-
-      - if: ${{ inputs.buildType == 'development' }}
-        name: "[Pre-build] Replace icon with Development"
-        run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
-
-      - if: ${{ inputs.buildType == 'nightly' }}
-        name: "[Pre-build] Replace icon with Nightly"
-        run: "cp -f bleedingedge/static/Icon_Nightly.png Assets/Art/UI/Icon_Stable.png"
+          - name: "[Pre-build] Restoring NuGet Packages"
+            run: dotnet tool install --global NuGetForUnity.Cli && nugetforunity restore
 
       #############################
       #           Build           #
       #############################
-
-      - name: "[Install] Download Unity Editor + Mac IL2CPP builder"
-        run: |
-          mkdir ${{ runner.temp }}/UnityInstall &&
-          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorInstaller/Unity-${{ env.unityVersion }}.pkg &&
-          curl -L -o "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" https://download.unity3d.com/download_unity/${{ env.unityVersionHash }}/MacEditorTargetInstaller/UnitySetup-Mac-IL2CPP-Support-for-Editor-${{ env.unityVersion }}.pkg
-
-      - name: "[Install] Install Unity Editor + Mac IL2CPP builder"
-        run: |
-          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Editor.pkg" -target "/" -verbose &&
-          sudo installer -pkg "${{ runner.temp }}/UnityInstall/UnitySetup-Mac-IL2CPP-Support.pkg" -target "/" -verbose &&
-          rm -rf "${{ runner.temp }}/UnityInstall"
 
       - name: "[Build] Run Builder"
         run: |
