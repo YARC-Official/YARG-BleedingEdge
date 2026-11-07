@@ -124,12 +124,19 @@ jobs:
           touch Assets/csc.rsp &&
           echo "-define:YARG_NIGHTLY_BUILD" >> Assets/csc.rsp
 
+      - if: ${{ inputs.buildType == 'testing' }}
+        name: "[Pre-build] Create a csc.rsp file (testing)"
+        shell: bash
+        run: >
+          touch Assets/csc.rsp &&
+          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+
       - if: ${{ inputs.buildType == 'development' }}
         name: "[Pre-build] Create a csc.rsp file (development)"
         shell: bash
         run: >
           touch Assets/csc.rsp &&
-          echo "-define:YARG_TEST_BUILD" >> Assets/csc.rsp
+          echo "-define:YARG_DEV_BUILD" >> Assets/csc.rsp
 
       #############################
       #      Install Blender      #
@@ -172,6 +179,10 @@ jobs:
 
       - if: ${{ inputs.buildType == 'development' }}
         name: "[Pre-build] Replace icon with Development"
+        run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
+
+      - if: ${{ inputs.buildType == 'testing' }}
+        name: "[Pre-build] Replace icon with Testing"
         run: "cp -f bleedingedge/static/Icon_Development.png Assets/Art/UI/Icon_Stable.png"
 
       - if: ${{ inputs.buildType == 'nightly' }}
